@@ -7,40 +7,85 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> {  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 24.0),
+          padding: EdgeInsets.symmetric(horizontal: 30.0),
           children: <Widget>[
             SizedBox(height: 80),
             Column(
               children: <Widget>[
                 SizedBox(height: 16.0),
                 Text(
-                  'SHRINE',
+                  'LMN',
                   style: Theme.of(context).textTheme.headline5,
                 ),
               ],
             ),
-            SizedBox(height: 120.0),
-            AccentColorOverride(
-              color: kBrown900,
-              child: TextField(
-                //controller: _usernameController,
-                decoration: InputDecoration(
-                  labelText: 'Username',
+            // MARK: - 番号ボタン
+            Padding(
+              padding: EdgeInsets.only(top: 50.0),
+              child: Column (
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                for (var i = 0; i < 3; i++)
+                Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      for (var j = 0; j < 3; j++)
+                      RawMaterialButton(
+                        onPressed: () {},
+                        elevation: 2.0,
+                        fillColor: Colors.white,
+                        child: Text(
+                          (1+j+(3*i)).toString(),
+                          style: TextStyle(
+                            fontSize: 20,
+                            //fontFamily: ,
+                          ),
+                        ),
+                        padding: EdgeInsets.all(20.0),
+                        shape: CircleBorder(),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
+          ),
+          ButtonBar(
+            children: <Widget>[
+              FlatButton(
+                child: Text('CANCEL'),
+                shape: BeveledRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(7.0))
+                  ),
+                  onPressed: (){
+                    // _userNameController.clear();
+                    // _userNameController.clear();
+                  },
+                ),
+                RaisedButton(
+                  child: Text('NEXT'),
+                  elevation: 8.0,
+                  shape: BeveledRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(7.0))
+                    ),
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            )
           ],
         )
       )
     );
-
-    // insert widhet
   }
 }
 
