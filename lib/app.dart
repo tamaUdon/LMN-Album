@@ -75,7 +75,7 @@ ThemeData _buildShrineTheme() {
     textSelectionColor: kMossGreen,
     errorColor: kErrorRed,
     buttonTheme: base.buttonTheme.copyWith(
-      buttonColor: kWhite,
+      buttonColor: kLightYellow,
       colorScheme: base.colorScheme.copyWith(
         secondary: kBrown900,
       ),
