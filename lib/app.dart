@@ -4,7 +4,7 @@ import 'package:flutter/semantics.dart';
 
 import 'backdrop.dart';
 import 'colors.dart';
-//import 'home.dart';
+import 'home.dart';
 import 'login.dart';
 //import 'category_menu_page.dart';
 //import 'model/product.dart';
@@ -21,7 +21,7 @@ class _AlbumAppState extends State<AlbumApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Shrine',
+      title: 'LeMoN',
       // 将来的に実装してもいい
       //home: Backdrop(
         //currentCategory: _currentCategory,
@@ -39,12 +39,12 @@ class _AlbumAppState extends State<AlbumApp> {
     );
   }
 
-  /// Function to call when a [Category] is tapped.
-  void _onCategoryTap(Category category) {
-    setState(() {
-      //_currentCategory = category;
-    });
-  }
+/// Function to call when a [Category] is tapped.
+//void _onCategoryTap(Category category) {
+//    setState(() {
+//       _currentCategory = category;
+//     });
+//   }
 }
 
 Route<dynamic> _getRoute(RouteSettings settings) {
@@ -59,13 +59,13 @@ Route<dynamic> _getRoute(RouteSettings settings) {
   );
 }
 
-final ThemeData _kShrineTheme = _buildShrineTheme();
+final ThemeData _kShrineTheme = _buildTheme();
 
 IconThemeData _customIconTheme(IconThemeData original) {
   return original.copyWith(color: kBrown900);
 }
 
-ThemeData _buildShrineTheme() {
+ThemeData _buildTheme() {
   final ThemeData base = ThemeData.light();
   return base.copyWith(
     accentColor: kBrown900,
@@ -87,14 +87,14 @@ ThemeData _buildShrineTheme() {
     inputDecorationTheme: InputDecorationTheme(
       //border: CutCornersBorder(),
     ),
-    textTheme: _buildShrineTextTheme(base.textTheme),
-    primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
-    accentTextTheme: _buildShrineTextTheme(base.accentTextTheme),
+    textTheme: _buildTextTheme(base.textTheme),
+    primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
+    accentTextTheme: _buildTextTheme(base.accentTextTheme),
     iconTheme: _customIconTheme(base.iconTheme),
   );
 }
 
-TextTheme _buildShrineTextTheme(TextTheme base) {
+TextTheme _buildTextTheme(TextTheme base) {
   return base.copyWith(
     headline5: base.headline5.copyWith(
       fontWeight: FontWeight.w500,
