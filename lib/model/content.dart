@@ -1,29 +1,29 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
-enum Category { all, accessories, clothing, home, }
+// Diaryの種類でソートする機能が必要な場合
+enum Sort { day, month, year } 
 
-class Product {
-  const Product({
-    @required this.category,
+class Diary {
+  const Diary({
+    //@required this.content,
     @required this.id,
-    @required this.isFeatured,
-    @required this.name,
-    @required this.price,
-  })  : assert(category != null),
-        assert(id != null),
-        assert(isFeatured != null),
-        assert(name != null),
-        assert(price != null);
+    @required this.title,
+    @required this.memo,
+    this.image,
+  })  : assert(id != null),
+        assert(title != null),
+        assert(memo != null);
 
-  final Category category;
+  //final Content content;
   final int id;
-  final bool isFeatured;
-  final String name;
-  final int price;
+  final String title;
+  final String memo;
+  final Image image;
 
-  String get assetName => '$id-0.jpg';
-  String get assetPackage => 'shrine_images';
+  //String get assetName => '$id-0.jpg';
+  //String get assetPackage => 'shrine_images';
 
-  @override
-  String toString() => "$name (id=$id)";
+  //@override
+  //String toString() => "$name (id=$id)";
 }
