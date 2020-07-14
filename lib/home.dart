@@ -30,7 +30,24 @@ class HomePage extends StatelessWidget {
             return _messageItem(diaries[index]);
           },
           itemCount: diaries.length,
-        )
+        ),
+        floatingActionButton: Container(
+          height: 70.0,
+          width: 70.0,
+          child: FittedBox(
+            child: FloatingActionButton(
+            onPressed: (){
+              // TODO: do something
+            },
+            child: Icon(
+              Icons.add,
+              color: kBrown900,
+              size: 30.0,
+            ),
+            backgroundColor: kLightYellow,
+            ),
+          ),
+        ),
       )
     );
   }
