@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'model/content.dart';
 import 'model/dummy_content_repository.dart';
+import 'detail.dart';
 
 class HomePage extends StatelessWidget {
 
@@ -27,7 +28,7 @@ class HomePage extends StatelessWidget {
             return separatorItem();
           },
           itemBuilder: (BuildContext context, int index) {
-            return _messageItem(diaries[index]);
+            return _messageItem(diaries[index], context);
           },
           itemCount: diaries.length,
         ),
@@ -59,7 +60,7 @@ Widget separatorItem() {
   );
 }
 
-Widget _messageItem(Diary diary) {
+Widget _messageItem(Diary diary, BuildContext context) {
   return Container(
     decoration: new BoxDecoration(
       border: new Border(bottom: BorderSide(width: 1.0, color: Colors.grey)),
@@ -80,6 +81,14 @@ Widget _messageItem(Diary diary) {
 
       onTap: () {
         print("onTap called.");
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context){
+              return ModalDiaryDetail();
+            },
+            fullscreenDialog: true
+          )
+        );
       }, // タップ
       onLongPress: () {
         print("onLongTap called.");
