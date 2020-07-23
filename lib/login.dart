@@ -1,7 +1,6 @@
 import 'package:albumapp/home.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import 'colors.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -11,7 +10,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {  
 
   String inputText = "";
-  String placeholder = "Input your passcord";
+  String placeholder = "Enter your passcord";
   String showText = "";
 
   @override
@@ -20,8 +19,7 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: 30.0),
-          children: <Widget>[
-            
+          children: <Widget>[    
             SizedBox(height: 50),
             Column(
               children: <Widget>[
@@ -102,7 +100,12 @@ class _LoginPageState extends State<LoginPage> {
                 Padding(
                   padding: EdgeInsets.all(20.0),
                   child: RawMaterialButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        inputText = 0.toString();
+                        showText += "*";
+                      });
+                    },
                     elevation: 2.0,
                     fillColor: Colors.white,
                     child: Text("0",
@@ -141,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: (){
                     // TODO: ここにパスコードチェックロジック
                     Navigator.of(context).push(
-                      MaterialPageRoute(
+                      CupertinoPageRoute(
                         builder: (context) {
                           return HomePage();
                         },
