@@ -41,5 +41,17 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<array>
+		<string>Can LeMoN access your PhotoLibrary to pick photos?</string>
+	</array>
+	<key>NSCameraUsageDescription</key>
+	<array>
+		<string>Can LeMoN access your Camera to take photos?</string>
+	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<array>
+		<string>Can LeMoN access your MicroPhone to take photos?</string>
+	</array>
 </dict>
 </plist>
