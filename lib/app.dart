@@ -1,11 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'dart:async';
 
 import 'backdrop.dart';
 import 'colors.dart';
 import 'home.dart';
 import 'login.dart';
+
 //import 'category_menu_page.dart';
 //import 'model/product.dart';
 //import 'supplemental/cut_corners_border.dart';
@@ -51,7 +55,7 @@ Route<dynamic> _getRoute(RouteSettings settings) {
   if (settings.name != '/login') {
     return null;
   }
-
+  
   return MaterialPageRoute<void>(
     settings: settings,
     builder: (BuildContext context) => LoginPage(),
