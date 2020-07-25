@@ -1,12 +1,14 @@
 import 'package:albumapp/colors.dart';
+import 'package:albumapp/show_diary.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'dart:math' as math;
 
 import 'model/content.dart';
 import 'model/dummy_content_repository.dart';
 
-import 'detail.dart';
+import 'edit_diary.dart';
 
 class HomePage extends StatelessWidget {
   static const String _title = 'LeMoN';
@@ -28,7 +30,7 @@ class StatefulHomePage extends StatefulWidget{
 }
 
 class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerProviderStateMixin{
-  int _selectedIndex = 0;
+  //int _selectedIndex = 0;
   TabController controller;
 
   final diaries = ContentRepository.loadContents();
@@ -37,7 +39,7 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
   @override
   void initState() {
     super.initState();
-    controller = TabController(length: 3, vsync: this);
+    controller = TabController(length: 2, vsync: this);
     controller.addListener(() {
       setState(() {});
     });
@@ -46,7 +48,7 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
   // タブ切り替え
   void _onItemTapped(int index){
     setState(() {
-      _selectedIndex = index;
+      //_selectedIndex = index;
       controller.index = index;
     });
   }
@@ -77,6 +79,7 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
     return MaterialApp(
       home: Scaffold(
         backgroundColor: kButtonColor,
@@ -84,7 +87,10 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
           centerTitle: true, 
           title: new Text(
             "LeMoN", 
-            style: TextStyle(color: kBrown900)
+            style: TextStyle(
+              color: kBrown900,
+              fontFamily: 'RobotoMono',
+            )
           ),
           backgroundColor: kLightGreen,
         ),
@@ -93,35 +99,31 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
           controller: controller,
           children: [
             // ダイアリーページ
-            ListView.separated(
-              separatorBuilder: (BuildContext context, int index) {
-                return separatorItem();
-              },
-              itemBuilder: (BuildContext context, int index) {
-                return _messageItem(diaries[index], context);
-              },
-              itemCount: diaries.length,
-            ),
-            // 空ページ
-            Center(child: Text('Empty Page')),
-            // マイページ
-            Center(child: Text('My Page')),
+            GridView.count(
+              crossAxisCount: 3,
+              crossAxisSpacing: 2,
+              mainAxisSpacing: 0,
+              shrinkWrap: true,
+              children: List.generate(
+                diaries.length, (index) {
+                  return _messageItem(diaries[index], context);
+                }
+              ),
+            ),// マイページ
+            _myPageItem(size)
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: kLightGreen,
           selectedItemColor: kAccentBlue,
           unselectedItemColor: kShadowGreen,
-          currentIndex: _selectedIndex,
+          currentIndex: controller.index,
           onTap: _onItemTapped,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
+
               icon: Icon(Icons.format_list_bulleted),
               title: Text('diary'),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add),
-              title: Text(''), 
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
@@ -138,7 +140,7 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
             ]);
             final angle = Tween(begin: 0 / 360, end: -90 / 360);
             return RotationTransition(
-              turns: _selectedIndex == 0
+              turns: controller.index == 0
                   ? angle.animate(animation)
                   : angle.animate(ReverseAnimation(animation)),
               alignment: Alignment.center,
@@ -148,8 +150,8 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
               ),
             );
           },
-          child: _selectedIndex == 0
-            // ダイアリー一覧ページ
+          child: controller.index == 0
+            // ダイアリー一覧ページ表示時のFAB
             ? FloatingActionButton(
                 backgroundColor: kLightYellow,
                 foregroundColor: kBrown900,
@@ -160,6 +162,7 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
                   angle: math.pi / 2,
                 ),
               )
+            // マイページ表示時のFAB
             : FloatingActionButton(
                 backgroundColor: kLightYellow,
                 foregroundColor: kBrown900,
@@ -180,35 +183,233 @@ Widget separatorItem() {
   );
 }
 
+// マイページ
+Widget _myPageItem(Size size){
+  return Container(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        new Stack(
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.only(top: size.height/4),
+              alignment: Alignment.center,
+              color: Colors.amberAccent[100].withOpacity(0.5),
+              child: Text('Hello'),
+            ),
+            new Align(
+              alignment: Alignment.center,
+              child: 
+              Padding(
+              padding: EdgeInsets.only(top: size.height/10),
+              child: 
+                Container(
+                  width: 200.0,
+                  height: 200.0,
+                  decoration: new BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      fit: BoxFit.fill,
+                      image: AssetImage('images/lemon.jpg'),
+                    )
+                  ),
+                ),
+              ),
+            )
+          ]
+        ),
+        Padding(
+          padding: EdgeInsets.all(30.0),
+          child: Column(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.person),
+                  Text(
+                    ' User: marika',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  )
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.all(20.0),
+                child: 
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(Icons.library_books),
+                    Text(
+                      ' Diaries: 6',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.calendar_today),
+                  Text(
+                    ' From: 2020/07/23',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  )
+                ],
+              )
+            ],
+          ),
+        )
+      ]
+    ),
+  );
+}
+
+//　マイページ編集画面
+Widget _myPageEditItem(){
+  return Container(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(top: 30.0),
+          child: Container(
+            width: 180.0,
+            height: 180.0,
+            decoration: new BoxDecoration(
+              shape: BoxShape.circle,
+              image: DecorationImage(
+                fit: BoxFit.fill,
+                image: AssetImage('images/cafe.jpg'),
+              )
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: 30.0),
+          child: 
+          ButtonBar(
+            alignment: MainAxisAlignment.center,
+            children: <Widget>[
+              // アイコン変更ボタン
+              FlatButton(
+                onPressed: () {},
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(
+                      Icons.face, 
+                      color: kBrown900,
+                    ),
+                    Text(
+                      'Set your icon',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        color: kBrown900,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+              // アイコン変更ボタンここまで
+            ],
+          ),
+        ),
+        Divider(
+          color: Colors.black,
+          height: 10,
+          thickness: 1,
+          indent: 20,
+          endIndent: 20,
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: 30.0),
+          child: 
+          ButtonBar(
+            alignment: MainAxisAlignment.center,
+            children: <Widget>[
+              // パスワード変更ボタン
+              FlatButton(
+                onPressed: () {},
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(
+                      Icons.lock, 
+                      color: kBrown900,
+                    ),
+                    Text(
+                      'Change Password',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        color: kBrown900,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+              // パスワード変更ボタンここまで
+            ],
+          ),
+        ),
+        Divider(
+          color: Colors.black,
+          height: 10,
+          thickness: 1,
+          indent: 20,
+          endIndent: 20,
+        ),
+      ],
+    )
+  );
+  // マイページ編集画面ここまで
+}
+
+// ダイアリー一覧画面
 Widget _messageItem(Diary diary, BuildContext context) {
   return Container(
     decoration: new BoxDecoration(
       border: new Border(bottom: BorderSide(width: 1.0, color: Colors.grey)),
-      color: kWhite
+      color: kWhite,
+      image: DecorationImage(
+        image: diary.image.image,
+        fit: BoxFit.cover,
+        colorFilter: ColorFilter.mode(kMossGreen.withOpacity(0.5), BlendMode.saturation)
+      ),
     ),
     child: ListTile(
-      leading: Icon(Icons.cake),
-      title: Text(
-        diary.title,
-        style: TextStyle(
-          color:kBrown900,
-          fontSize: 18.0
-        ),
-      ),
-      subtitle: Text(diary.memo),
-      trailing: Icon(Icons.more_vert),
+      //leading: Icon(Icons.cake),
+      //Image.asset('images/sample.jpg'),
+      // title: Text(
+      //   diary.title,
+      //   style: TextStyle(
+      //     color:kWhite,
+      //     fontSize: 18.0,
+      //     fontStyle: FontStyle.italic
+      //   ),
+      // ),
+      //subtitle: Text(diary.memo),
+      //trailing: Icon(Icons.more_vert),
       contentPadding: EdgeInsets.all(10.0),
 
       onTap: () {
         print("onTap called.");
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //     builder: (BuildContext context){
-        //       return ModalDiaryDetail();
-        //     },
-        //     fullscreenDialog: true
-        //   )
-        // );
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context){
+              return ModalDiaryShow(diary);
+            },
+            fullscreenDialog: true
+          )
+        );
       }, // タップ
       onLongPress: () {
         print("onLongTap called.");
