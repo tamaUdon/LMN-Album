@@ -3,11 +3,13 @@ import 'package:albumapp/show_diary.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:path/path.dart' as Path;
+import 'package:sqflite/sqflite.dart';
+
 import 'dart:math' as math;
 
 import 'model/content.dart';
 import 'model/dummy_content_repository.dart';
-
 import 'edit_diary.dart';
 
 class HomePage extends StatelessWidget {
@@ -32,6 +34,7 @@ class StatefulHomePage extends StatefulWidget{
 class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerProviderStateMixin{
   //int _selectedIndex = 0;
   TabController controller;
+  Future<Database> database;
 
   final diaries = ContentRepository.loadContents();
   //HomePage();
@@ -39,10 +42,86 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
   @override
   void initState() {
     super.initState();
+
+    initDB();
     controller = TabController(length: 2, vsync: this);
     controller.addListener(() {
       setState(() {});
     });
+  }
+
+  // DB初期化
+  void initDB() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    database = openDatabase(
+      Path.join(await getDatabasesPath(), 'my_diaries.db'), // DB名: my_diaries
+      // When the database is first created, create a table to store diaries.
+      onCreate: (db, version) {
+        return db.execute( // TABLE名: diaries
+          "CREATE TABLE diaries(id INTEGER PRIMARY KEY, title TEXT, memo TEXT, date TEXT, image TEXT)",
+        );
+      },
+      version: 1,
+    );
+  }
+
+  // INSERT
+  Future<void> insertDiary(Diary diary) async {
+    final Database db = await database;
+    await db.insert(
+      'diaries',
+      diary.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Diary>> getDiaries() async {
+    // Get a reference to the database.
+    final Database db = await database;
+
+    // Query the table for all The Dogs.
+    final List<Map<String, dynamic>> maps = await db.query('diaries');
+
+    // Convert the List<Map<String, dynamic> into a List<Diary>.
+    return List.generate(maps.length, (i) {
+      return Diary(
+        title: maps[i]['name'],
+        memo: maps[i]['age'],
+        date: maps[i]['date'],
+        image: maps[i]['image'],
+      );
+    });
+  }
+
+  // UPDATE
+  Future<void> updateDiary(Diary diary) async {
+    // Get a reference to the database.
+    final db = await database;
+
+    // Update the given Dog.
+    await db.update(
+      'diaries',
+      diary.toMap(),
+      // Ensure that the Dog has a matching id.
+      where: "id = ?",
+      // Pass the Dog's id as a whereArg to prevent SQL injection.
+      whereArgs: [diary.id],
+    );
+  }
+
+  // DELETE
+  Future<void> deleteDiary(int id) async {
+    // Get a reference to the database.
+    final db = await database;
+
+    // Remove the Dog from the database.
+    await db.delete(
+      'diaries',
+      // Use a `where` clause to delete a specific dog.
+      where: "id = ?",
+      // Pass the Dog's id as a whereArg to prevent SQL injection.
+      whereArgs: [id],
+    );
   }
 
   // タブ切り替え
