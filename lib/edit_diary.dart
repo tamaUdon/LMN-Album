@@ -3,8 +3,12 @@
 import 'dart:io';
 
 import 'package:albumapp/colors.dart';
+import 'package:albumapp/model/content.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:async';
+
+import 'package:sqflite/sqflite.dart';
 
 class ModalDiaryDetail extends StatefulWidget{
   @override
@@ -14,6 +18,11 @@ class ModalDiaryDetail extends StatefulWidget{
 class _ModalDiarydetailState extends State<ModalDiaryDetail>{
   File _image;
   final picker = ImagePicker();
+
+  @override
+  void initState(){
+    super.initState();
+  }
   
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.camera);
@@ -24,6 +33,7 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
   }
 
   void _onOKTapped(){
+    // TODO: ここでダイアリー保存
     Navigator.of(context).pop();
   }
 
@@ -92,8 +102,16 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
                             )
                           ],
                         )
-                      // 画像選択後、画像表示する
-                      : Image.file(_image) // TODO: タップ可能にして再度選択可能にする
+                      // 画像選択後、画像表示する => 再選択可
+                      : ButtonBar(
+                          children: <Widget>[
+                            FlatButton(
+                              onPressed: getImage,
+                              child: Image.file(_image) 
+                            ),
+                            
+                          ],
+                        ) 
                     ),
                   )
                 )
