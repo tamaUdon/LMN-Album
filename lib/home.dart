@@ -6,14 +6,19 @@ import 'package:flutter/rendering.dart';
 import 'package:path/path.dart' as Path;
 import 'package:sqflite/sqflite.dart';
 
+import 'dart:io' as Io;
 import 'dart:math' as math;
+import 'dart:convert';
 
 import 'model/content.dart';
+import 'model/dao.dart';
 import 'model/dummy_content_repository.dart';
+
 import 'edit_diary.dart';
 
 class HomePage extends StatelessWidget {
   static const String _title = 'LeMoN';
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,99 +34,36 @@ class StatefulHomePage extends StatefulWidget{
   @override
   _StatefulHomePageState createState() => 
     _StatefulHomePageState();
-}
+  }
 
-class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerProviderStateMixin{
+class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerProviderStateMixin {
   //int _selectedIndex = 0;
   TabController controller;
-  Future<Database> database;
+  Future<List<Diary>> listDiaries;
 
-  final diaries = ContentRepository.loadContents();
+  //final diaries = ContentRepository.loadContents();
+
   //HomePage();
 
   @override
   void initState() {
     super.initState();
 
-    initDB();
+    DAO.initDB();
+    listDiaries = DAO.getDiaries();
+    // if (listDiaries != null){
+    //   print(listDiaries);
+    //   print("日記があります");
+    // }else{
+    //   print('日記がありませんでした');
+    //   DAO.insertDiary(new Diary(id: 0, title: "sample", memo: "sample text", image: base64Encode(Io.File('bar.jpg').readAsBytesSync())));
+    //   listDiaries = DAO.getDiaries();
+    // }
+
     controller = TabController(length: 2, vsync: this);
     controller.addListener(() {
       setState(() {});
     });
-  }
-
-  // DB初期化
-  void initDB() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    database = openDatabase(
-      Path.join(await getDatabasesPath(), 'my_diaries.db'), // DB名: my_diaries
-      // When the database is first created, create a table to store diaries.
-      onCreate: (db, version) {
-        return db.execute( // TABLE名: diaries
-          "CREATE TABLE diaries(id INTEGER PRIMARY KEY, title TEXT, memo TEXT, date TEXT, image TEXT)",
-        );
-      },
-      version: 1,
-    );
-  }
-
-  // INSERT
-  Future<void> insertDiary(Diary diary) async {
-    final Database db = await database;
-    await db.insert(
-      'diaries',
-      diary.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Future<List<Diary>> getDiaries() async {
-    // Get a reference to the database.
-    final Database db = await database;
-
-    // Query the table for all The Dogs.
-    final List<Map<String, dynamic>> maps = await db.query('diaries');
-
-    // Convert the List<Map<String, dynamic> into a List<Diary>.
-    return List.generate(maps.length, (i) {
-      return Diary(
-        title: maps[i]['name'],
-        memo: maps[i]['age'],
-        date: maps[i]['date'],
-        image: maps[i]['image'],
-      );
-    });
-  }
-
-  // UPDATE
-  Future<void> updateDiary(Diary diary) async {
-    // Get a reference to the database.
-    final db = await database;
-
-    // Update the given Dog.
-    await db.update(
-      'diaries',
-      diary.toMap(),
-      // Ensure that the Dog has a matching id.
-      where: "id = ?",
-      // Pass the Dog's id as a whereArg to prevent SQL injection.
-      whereArgs: [diary.id],
-    );
-  }
-
-  // DELETE
-  Future<void> deleteDiary(int id) async {
-    // Get a reference to the database.
-    final db = await database;
-
-    // Remove the Dog from the database.
-    await db.delete(
-      'diaries',
-      // Use a `where` clause to delete a specific dog.
-      where: "id = ?",
-      // Pass the Dog's id as a whereArg to prevent SQL injection.
-      whereArgs: [id],
-    );
   }
 
   // タブ切り替え
@@ -183,11 +125,24 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
               crossAxisSpacing: 2,
               mainAxisSpacing: 0,
               shrinkWrap: true,
-              children: List.generate(
-                diaries.length, (index) {
-                  return _messageItem(diaries[index], context);
-                }
-              ),
+              children: <Widget>[
+                FutureBuilder(
+                  future: listDiaries,
+                  builder: (context, AsyncSnapshot snapshot){
+                    if (snapshot.hasData){
+                        final diary = snapshot as List<Diary>;
+                        var _items;
+                        List.generate(diary.length, (index){
+                          _items = _messageItem(diary[index], context);
+                      });
+                      return _items;
+                    }else{
+                      return Center(child: Text('please add new diary...'));
+                      // TODO: ダイアリーがない場合、作成を促すダイアログを出す
+                    }
+                  },
+                )
+              ]
             ),// マイページ
             _myPageItem(size)
           ],
