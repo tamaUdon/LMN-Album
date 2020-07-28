@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-//import 'objectbox.g.dart';
 
 // Diaryの種類でソートする機能が必要な場合
 enum Sort { list, tile } 
@@ -11,7 +10,7 @@ class Diary {
     DateTime date;
     Image image;
     
-    Diary({String title, String memo, DateTime date, Image image}); 
+    Diary({String title, String memo, DateTime date, String image, int id, isFeatured}); 
 
     Diary.construct(this.id, this.title, this.memo, this.image){
       date = DateTime.now();
@@ -28,5 +27,5 @@ class Diary {
     };
   }
 
-    toString() => "Diary{id: $id, title: $title, memo: $memo, date: $date, image: $image}";
+  toString() => "Diary{id: $id, title: $title, memo: $memo, date: $date, image: $image}";
 }
