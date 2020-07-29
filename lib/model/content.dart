@@ -10,9 +10,9 @@ class Diary {
     DateTime date;
     Image image;
     
-    Diary({String title, String memo, DateTime date, String image, int id, isFeatured}); 
+    Diary({String title, String memo, DateTime date, String image}); 
 
-    Diary.construct(this.id, this.title, this.memo, this.image){
+    Diary.construct(this.title, this.memo, this.image){
       date = DateTime.now();
       print("constructed date: $date");
     }
