@@ -1,5 +1,4 @@
-
-
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:albumapp/colors.dart';
@@ -10,6 +9,8 @@ import 'dart:async';
 
 import 'package:sqflite/sqflite.dart';
 
+import 'model/dao.dart';
+
 class ModalDiaryDetail extends StatefulWidget{
   @override
   _ModalDiarydetailState createState() => _ModalDiarydetailState();
@@ -18,13 +19,15 @@ class ModalDiaryDetail extends StatefulWidget{
 class _ModalDiarydetailState extends State<ModalDiaryDetail>{
   File _image;
   final picker = ImagePicker();
+  final _titleController = new TextEditingController();
+  final _memoController = new TextEditingController();
 
   @override
   void initState(){
     super.initState();
   }
   
-  Future getImage() async {
+  Future setImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.camera);
 
     setState(() {
@@ -32,9 +35,20 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
     });
   }
 
-  void _onOKTapped(){
-    // TODO: ここでダイアリー保存
-    Navigator.of(context).pop();
+  // ダイアリー保存
+  Future<void> _onOKTapped() async {
+    String base64Image;
+    // 画像変換
+    if (_image != null){
+      List<int> imageBytes = _image.readAsBytesSync();
+      base64Image = base64Encode(imageBytes);
+    }else{
+      File imageFile = new File('images/sea.jpg');
+      List<int> imageBytes = imageFile.readAsBytesSync();
+      base64Image = base64Encode(imageBytes);
+    }
+    await DAO.insertDiary(new Diary(title: _titleController.text, memo: _memoController.text, image: base64Image));
+    Navigator.of(context).pop(); // TODO: ここで戻った先のhome.dartに引数を渡して画面を再描画させる
   }
 
   @override
@@ -58,6 +72,7 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
                 SizedBox(height: 16.0),
                 // MARK: - タイトル入力欄
                 new TextField(
+                  controller: _titleController,
                   enabled: true,
                   maxLength: 50,
                   decoration: const InputDecoration(
@@ -70,6 +85,7 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
                   child: Padding(
                     padding: EdgeInsets.all(10.0),
                     child: TextField(
+                      controller: _memoController,
                       maxLength: 100,
                       maxLines: 10,
                       decoration: InputDecoration.collapsed(hintText: "Enter your text here")
@@ -98,7 +114,7 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
                                     fontWeight: FontWeight.w300,
                                   ),
                                 ),
-                              onPressed: getImage,
+                              onPressed: setImage,
                             )
                           ],
                         )
@@ -106,7 +122,7 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
                       : ButtonBar(
                           children: <Widget>[
                             FlatButton(
-                              onPressed: getImage,
+                              onPressed: setImage,
                               child: Image.file(_image) 
                             ),
                             
