@@ -37,13 +37,8 @@ class StatefulHomePage extends StatefulWidget{
   }
 
 class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerProviderStateMixin {
-  //int _selectedIndex = 0;
   TabController controller;
   Future<List<Diary>> listDiaries;
-
-  //final diaries = ContentRepository.loadContents();
-
-  //HomePage();
 
   @override
   void initState() {
@@ -51,19 +46,18 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
 
     DAO.initDB();
     listDiaries = DAO.getDiaries();
-    // if (listDiaries != null){
-    //   print(listDiaries);
-    //   print("日記があります");
-    // }else{
-    //   print('日記がありませんでした');
-    //   DAO.insertDiary(new Diary(id: 0, title: "sample", memo: "sample text", image: base64Encode(Io.File('bar.jpg').readAsBytesSync())));
-    //   listDiaries = DAO.getDiaries();
-    // }
 
     controller = TabController(length: 2, vsync: this);
     controller.addListener(() {
       setState(() {});
     });
+  }
+
+  @override
+  void didUpdateWidget(Widget oldWidget){
+    print("called didUpdate");
+    listDiaries = DAO.getDiaries();
+    super.didUpdateWidget(oldWidget);
   }
 
   // タブ切り替え
@@ -187,9 +181,9 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
           child: controller.index == 0
             // ダイアリー一覧ページ表示時のFAB
             ? FloatingActionButton(
+                heroTag: "diary_btn",
                 backgroundColor: kLightYellow,
                 foregroundColor: kBrown900,
-                key: UniqueKey(),
                 onPressed: _onDiaryCreateTapped,
                 child: Transform.rotate(
                   child: Icon(Icons.add),
@@ -198,9 +192,9 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
               )
             // マイページ表示時のFAB
             : FloatingActionButton(
+                heroTag: "mypage_btn",
                 backgroundColor: kLightYellow,
                 foregroundColor: kBrown900,
-                key: UniqueKey(),
                 onPressed: _onEditMyPageTapped,
                 child: Icon(Icons.edit),
               ),
