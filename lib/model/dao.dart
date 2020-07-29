@@ -30,10 +30,10 @@ class DAO {
       // When the database is first created, create a table to store diaries.
       onCreate: (db, version) {
         return db.execute( // TABLE名: diaries
-          "CREATE TABLE diaries(id INTEGER PRIMARY KEY, title TEXT, memo TEXT, date TEXT, image TEXT)",
+          "CREATE TABLE diaries(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, memo TEXT, date TEXT, image TEXT)",
         );
       },
-      version: 1,
+      version: 2,
     );
   }
 
