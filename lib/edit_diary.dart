@@ -42,12 +42,24 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
     if (_image != null){
       List<int> imageBytes = _image.readAsBytesSync();
       base64Image = base64Encode(imageBytes);
+      print("画像がありました");
     }else{
       File imageFile = new File('images/sea.jpg');
       List<int> imageBytes = imageFile.readAsBytesSync();
       base64Image = base64Encode(imageBytes);
+      print("画像がnullでした");
     }
-    await DAO.insertDiary(new Diary(title: _titleController.text, memo: _memoController.text, image: base64Image));
+    try {
+      print("入力したタイトル: " + _titleController.text);
+      print("入力したmemo: " + _memoController.text);
+      print("撮影した画像:" + base64Image);
+      print("INSERTします...");
+      await DAO.insertDiary(new Diary(title: _titleController.text, memo: _memoController.text, image: base64Image));
+    }catch(e){
+      print("could not insert diary...");
+      // TODO: ここでINSERT失敗ダイアログ
+    }
+    print("INSERT成功");
     Navigator.of(context).pop(); // TODO: ここで戻った先のhome.dartに引数を渡して画面を再描画させる
   }
 
