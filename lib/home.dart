@@ -38,14 +38,14 @@ class StatefulHomePage extends StatefulWidget{
 
 class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerProviderStateMixin {
   TabController controller;
-  Future<List<Diary>> listDiaries;
+  //Future<List<Diary>> listDiaries;
+  //List<Diary> listDiaries;
 
   @override
   void initState() {
+    print("home: initState!");
+    initializeDiary();
     super.initState();
-
-    DAO.initDB();
-    listDiaries = DAO.getDiaries();
 
     controller = TabController(length: 2, vsync: this);
     controller.addListener(() {
@@ -53,11 +53,12 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
     });
   }
 
-  @override
-  void didUpdateWidget(Widget oldWidget){
-    print("called didUpdate");
-    listDiaries = DAO.getDiaries();
-    super.didUpdateWidget(oldWidget);
+  Future<List<Diary>> initializeDiary() async{
+    print("initializeDiary!");
+    await DAO.initDB();
+    print(await DAO.getDiaries());
+    List<Diary> listDiaries = await DAO.getDiaries();
+    return listDiaries;
   }
 
   // タブ切り替え
@@ -119,17 +120,48 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
               crossAxisSpacing: 2,
               mainAxisSpacing: 0,
               shrinkWrap: true,
+              // children: List.generate(
+              //   listDiaries.length, (index) {
+              //     return Container(
+              //       child: GridTile(
+              //         child: listDiaries[index].image,
+              //         footer: Text(listDiaries[index].date),
+              //       )
+              //     );
+              //   }
+              // )
               children: <Widget>[
                 FutureBuilder(
-                  future: listDiaries,
+                  future: initializeDiary(),
                   builder: (context, AsyncSnapshot snapshot){
                     if (snapshot.hasData){
-                        final diary = snapshot as List<Diary>;
+
+                      List<Diary> diary = snapshot.data as List<Diary>;
+                      // final diaries = List.generate(diary.length, (index) {
+                      //   return diary[index].image;
+                      // });
+                        // final diary = snapshot.data.map<Diary>((document) {
+                        //   try {
+                        //   return List.generate(document.length, (index){
+                        //     try {
+                        //       return Diary(title: document[index].title, memo: document[index].memo, image: document[index].image);
+                        //     }catch (e){
+                        //       print("cannot generate Diary... : " + e);
+                        //       return null;
+                        //     }
+                        //   });
+                        //   }catch (e){
+                        //     print("cannot generate List... : " + e);
+                        //     return null;
+                        //   }
+                        // }).toList();
+                        
+                        //return diary;
                         var _items;
                         List.generate(diary.length, (index){
                           _items = _messageItem(diary[index], context);
-                      });
-                      return _items;
+                        });
+                        return _items;
                     }else{
                       return Center(child: Text('please add new diary...'));
                       // TODO: ダイアリーがない場合、作成を促すダイアログを出す
@@ -402,13 +434,13 @@ Widget _myPageEditItem(){
 }
 
 // ダイアリー一覧画面
-Widget _messageItem(Diary diary, BuildContext context) {
+Widget _messageItem(Diary dr, BuildContext context) {
   return Container(
     decoration: new BoxDecoration(
       border: new Border(bottom: BorderSide(width: 1.0, color: Colors.grey)),
       color: kWhite,
       image: DecorationImage(
-        image: diary.image.image,
+        image: (dr.image != null ? dr.image : AssetImage('images/sea.jpg')), // TODO: ダミーデータ表示
         fit: BoxFit.cover,
         colorFilter: ColorFilter.mode(kMossGreen.withOpacity(0.5), BlendMode.saturation)
       ),
@@ -433,7 +465,7 @@ Widget _messageItem(Diary diary, BuildContext context) {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context){
-              return ModalDiaryShow(diary);
+              return ModalDiaryShow(dr);
             },
             fullscreenDialog: true
           )
