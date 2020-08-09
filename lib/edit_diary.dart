@@ -5,6 +5,7 @@ import 'package:albumapp/colors.dart';
 import 'package:albumapp/model/content.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
 import 'package:sqflite/sqflite.dart';
@@ -21,19 +22,59 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
   final picker = ImagePicker();
   final _titleController = new TextEditingController();
   final _memoController = new TextEditingController();
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   @override
   void initState(){
     super.initState();
   }
-  
-  Future setImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.camera);
+
+  // 日記の通し番号取得
+  Future<int> _getCurrentDiaryCount() async {
+    Future<int> _counter;
+
+    //setState(() {
+      _counter = _prefs.then((SharedPreferences prefs) {
+        return (prefs.getInt('counter') ?? 0);
+      });
+    //});
+    return _counter;
+  }
+
+  // 日記の通し番号をカウントアップしてセット
+  Future<bool> _addDiaryCounter() async {
+    final SharedPreferences prefs = await _prefs;
+    int _counter;
+    Future<bool> _setSuccessFlg;
+
+    try {
+        _counter = await _getCurrentDiaryCount();
+    }catch (e){
+      print(e.toString());
+      return false;
+    }
 
     setState(() {
-      _image = File(pickedFile.path);
+      _setSuccessFlg = prefs.setInt("counter", _counter++).then((bool success) {
+        if (success){
+          print("current diary id : " + _counter.toString());
+          return true;
+        }
+        return false;
+      });
     });
-  }
+
+    return _setSuccessFlg;
+  } 
+
+  
+  // Future setImage() async {
+  //   final pickedFile = await picker.getImage(source: ImageSource.camera);
+
+  //   setState(() {
+  //     _image = File(pickedFile.path);
+  //   });
+  // }
 
   // ダイアリー保存
   Future<void> _onOKTapped() async {
@@ -41,7 +82,16 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
       print("入力したタイトル: " + _titleController.text);
       print("入力したmemo: " + _memoController.text);
       print("INSERTします...");
-      await DAO.insertDiary(new Diary(0, _titleController.text, _memoController.text));
+      bool _success = await _addDiaryCounter();
+      if (_success){
+        // 最初の日記
+        int count = await _getCurrentDiaryCount();
+        DAO.insertDiary(new Diary(count, _titleController.text, _memoController.text));
+      }else{
+        print("日記カウントアップに失敗しました");
+        return;
+        // TODO: ここでINSERT失敗ダイアログ
+      }
     }catch(e){
       print("could not insert diary...");
       // TODO: ここでINSERT失敗ダイアログ
