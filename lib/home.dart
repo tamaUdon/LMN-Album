@@ -55,6 +55,27 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
     return new List<Diary>.filled(1, new Diary(0,'Let\'s create new Diary!',''));
   }
 
+  // 編集ボタンタップ
+  void _onTapMore(){
+    _showCupertinoActionSheet(context);
+  }
+
+  void _showCupertinoActionSheet(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoActionSheet(
+          message: Text("Select Your Action"),
+          actions: <Widget>[
+            CupertinoActionSheetAction(child: Text("EDIT"), onPressed: () { Navigator.pop(context); },),
+            CupertinoActionSheetAction(child: Text("DELETE"), onPressed: () { Navigator.pop(context); }, isDestructiveAction: true,),
+          ],
+          cancelButton: CupertinoActionSheetAction(child: Text("Cancel"), onPressed: () { Navigator.pop(context); },),
+        );
+      }
+    );
+  }
+
   // タブ切り替え
   void _onItemTapped(int index){
     setState(() {
@@ -197,75 +218,59 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
       )
     );
   }
-}
-Widget separatorItem() {
-  return Container(
-    height: 1,
-    color: kButtonColor,
-  );
-}
 
-// マイページ
-Widget _myPageItem(Size size){
-  return Container(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        new Stack(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.only(top: size.height/4),
-              alignment: Alignment.center,
-              color: Colors.amberAccent[100].withOpacity(0.5),
-              child: Text('Hello'),
-            ),
-            new Align(
-              alignment: Alignment.center,
-              child: 
-              Padding(
-              padding: EdgeInsets.only(top: size.height/10),
-              child: 
-                Container(
-                  width: 200.0,
-                  height: 200.0,
-                  decoration: new BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      fit: BoxFit.fill,
-                      image: AssetImage('images/lemon.jpg'),
-                    )
+  Widget separatorItem() {
+    return Container(
+      height: 1,
+      color: kButtonColor,
+    );
+  }
+
+  // マイページ
+  Widget _myPageItem(Size size){
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          new Stack(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.only(top: size.height/4),
+                alignment: Alignment.center,
+                color: Colors.amberAccent[100].withOpacity(0.5),
+                child: Text('Hello'),
+              ),
+              new Align(
+                alignment: Alignment.center,
+                child: 
+                Padding(
+                padding: EdgeInsets.only(top: size.height/10),
+                child: 
+                  Container(
+                    width: 200.0,
+                    height: 200.0,
+                    decoration: new BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        fit: BoxFit.fill,
+                        image: AssetImage('images/lemon.jpg'),
+                      )
+                    ),
                   ),
                 ),
-              ),
-            )
-          ]
-        ),
-        Padding(
-          padding: EdgeInsets.all(30.0),
-          child: Column(
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(Icons.person),
-                  Text(
-                    ' User: marika',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  )
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.all(20.0),
-                child: 
+              )
+            ]
+          ),
+          Padding(
+            padding: EdgeInsets.all(30.0),
+            child: Column(
+              children: <Widget>[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Icon(Icons.library_books),
+                    Icon(Icons.person),
                     Text(
-                      ' Diaries: 6',
+                      ' User: marika',
                       style: TextStyle(
                         fontSize: 18.0,
                         fontStyle: FontStyle.italic,
@@ -273,159 +278,179 @@ Widget _myPageItem(Size size){
                     )
                   ],
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(Icons.calendar_today),
-                  Text(
-                    ' From: 2020/07/23',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  )
-                ],
-              )
-            ],
-          ),
-        )
-      ]
-    ),
-  );
-}
+                Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: 
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(Icons.library_books),
+                      Text(
+                        ' Diaries: 6',
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(Icons.calendar_today),
+                    Text(
+                      ' From: 2020/07/23',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+          )
+        ]
+      ),
+    );
+  }
 
-//　マイページ編集画面
-Widget _myPageEditItem(){
-  return Container(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(top: 30.0),
-          child: Container(
-            width: 180.0,
-            height: 180.0,
-            decoration: new BoxDecoration(
-              shape: BoxShape.circle,
-              image: DecorationImage(
-                fit: BoxFit.fill,
-                image: AssetImage('images/cafe.jpg'),
-              )
+  //　マイページ編集画面
+  Widget _myPageEditItem(){
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(top: 30.0),
+            child: Container(
+              width: 180.0,
+              height: 180.0,
+              decoration: new BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  fit: BoxFit.fill,
+                  image: AssetImage('images/cafe.jpg'),
+                )
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 30.0),
-          child: 
-          ButtonBar(
-            alignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // アイコン変更ボタン
-              FlatButton(
-                onPressed: () {},
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(
-                      Icons.face, 
-                      color: kBrown900,
-                    ),
-                    Text(
-                      'Set your icon',
-                      style: TextStyle(
-                        fontSize: 18.0,
+          Padding(
+            padding: EdgeInsets.only(top: 30.0),
+            child: 
+            ButtonBar(
+              alignment: MainAxisAlignment.center,
+              children: <Widget>[
+                // アイコン変更ボタン
+                FlatButton(
+                  onPressed: () {},
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(
+                        Icons.face, 
                         color: kBrown900,
                       ),
-                    ),
-                  ],
-                ),
-              )
-              // アイコン変更ボタンここまで
-            ],
+                      Text(
+                        'Set your icon',
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          color: kBrown900,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                // アイコン変更ボタンここまで
+              ],
+            ),
           ),
-        ),
-        Divider(
-          color: Colors.black,
-          height: 10,
-          thickness: 1,
-          indent: 20,
-          endIndent: 20,
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 30.0),
-          child: 
-          ButtonBar(
-            alignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // パスワード変更ボタン
-              FlatButton(
-                onPressed: () {},
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(
-                      Icons.lock, 
-                      color: kBrown900,
-                    ),
-                    Text(
-                      'Change Password',
-                      style: TextStyle(
-                        fontSize: 18.0,
+          Divider(
+            color: Colors.black,
+            height: 10,
+            thickness: 1,
+            indent: 20,
+            endIndent: 20,
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 30.0),
+            child: 
+            ButtonBar(
+              alignment: MainAxisAlignment.center,
+              children: <Widget>[
+                // パスワード変更ボタン
+                FlatButton(
+                  onPressed: () {},
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(
+                        Icons.lock, 
                         color: kBrown900,
                       ),
-                    ),
-                  ],
-                ),
-              )
-              // パスワード変更ボタンここまで
-            ],
+                      Text(
+                        'Change Password',
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          color: kBrown900,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                // パスワード変更ボタンここまで
+              ],
+            ),
           ),
-        ),
-        Divider(
-          color: Colors.black,
-          height: 10,
-          thickness: 1,
-          indent: 20,
-          endIndent: 20,
-        ),
-      ],
-    )
-  );
-  // マイページ編集画面ここまで
-}
+          Divider(
+            color: Colors.black,
+            height: 10,
+            thickness: 1,
+            indent: 20,
+            endIndent: 20,
+          ),
+        ],
+      )
+    );
+    // マイページ編集画面ここまで
+  }
 
-// ダイアリー一覧画面
-Widget _messageItem(Diary dr, BuildContext context) {
-  return Container(
-    child: ListTile(
-      leading: Icon(Icons.cake),
-      title: Text(
-        dr.title,
-        style: TextStyle(
-          color:kBrown900,
-          fontSize: 18.0,
-          fontStyle: FontStyle.italic
+  // ダイアリー一覧画面
+  Widget _messageItem(Diary dr, BuildContext context) {
+    return Container(
+      child: ListTile(
+        leading: Icon(Icons.cake),
+        title: Text(
+          dr.title,
+          style: TextStyle(
+            color:kBrown900,
+            fontSize: 18.0,
+            fontStyle: FontStyle.italic
+          ),
         ),
+        subtitle: Text(dr.memo),
+        trailing: IconButton(
+          icon: Icon(Icons.more_vert),
+          onPressed: _onTapMore,
+        ),
+        contentPadding: EdgeInsets.all(10.0),
+
+        onTap: () {
+          print("onTap called.");
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context){
+                return ModalDiaryShow(dr);
+              },
+              fullscreenDialog: true
+            )
+          );
+        }, // タップ
+        onLongPress: () {
+          print("onLongTap called.");
+        }, // 長押し
       ),
-      subtitle: Text(dr.memo),
-      trailing: Icon(Icons.more_vert),
-      contentPadding: EdgeInsets.all(10.0),
-
-      onTap: () {
-        print("onTap called.");
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context){
-              return ModalDiaryShow(dr);
-            },
-            fullscreenDialog: true
-          )
-        );
-      }, // タップ
-      onLongPress: () {
-        print("onLongTap called.");
-      }, // 長押し
-    ),
-  );
+    );
+  }
 }
