@@ -92,44 +92,44 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
                   ),
                 ),
                 // MARK: - 画像ピッカー
-                Padding(
-                  padding: EdgeInsets.only(top: 10.0),
-                  child: 
-                  Card(
-                    borderOnForeground: true,
-                    child: Center(
-                      child:
-                      _image == null
-                      // 画像ピッカーボタン
-                      ? ButtonBar(
-                        alignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            FlatButton(
-                              child: 
-                                Text(
-                                  'Tap to select image',
-                                  style: TextStyle(
-                                    color: kBrown900,
-                                    fontWeight: FontWeight.w300,
-                                  ),
-                                ),
-                              onPressed: setImage,
-                            )
-                          ],
-                        )
-                      // 画像選択後、画像表示する => 再選択可
-                      : ButtonBar(
-                          children: <Widget>[
-                            FlatButton(
-                              onPressed: setImage,
-                              child: Image.file(_image) 
-                            ),
+                // Padding(
+                //   padding: EdgeInsets.only(top: 10.0),
+                //   child: 
+                //   Card(
+                //     borderOnForeground: true,
+                //     child: Center(
+                //       child:
+                //       _image == null
+                //       // 画像ピッカーボタン
+                //       ? ButtonBar(
+                //         alignment: MainAxisAlignment.start,
+                //           children: <Widget>[
+                //             FlatButton(
+                //               child: 
+                //                 Text(
+                //                   'Tap to select image',
+                //                   style: TextStyle(
+                //                     color: kBrown900,
+                //                     fontWeight: FontWeight.w300,
+                //                   ),
+                //                 ),
+                //               onPressed: setImage,
+                //             )
+                //           ],
+                //         )
+                //       // 画像選択後、画像表示する => 再選択可
+                //       : ButtonBar(
+                //           children: <Widget>[
+                //             FlatButton(
+                //               onPressed: setImage,
+                //               child: Image.file(_image) 
+                //             ),
                             
-                          ],
-                        ) 
-                    ),
-                  )
-                )
+                //           ],
+                //         ) 
+                //     ),
+                //   )
+                // )
               ]
             ),
             // OKボタン
