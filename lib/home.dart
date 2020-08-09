@@ -12,8 +12,6 @@ import 'dart:convert';
 
 import 'model/content.dart';
 import 'model/dao.dart';
-import 'model/dummy_content_repository.dart';
-
 import 'edit_diary.dart';
 
 class HomePage extends StatelessWidget {
