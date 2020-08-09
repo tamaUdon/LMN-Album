@@ -44,7 +44,6 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
   @override
   void initState() {
     print("home: initState!");
-    initializeDiary();
     super.initState();
 
     controller = TabController(length: 2, vsync: this);
@@ -58,7 +57,10 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
     await DAO.initDB();
     print(await DAO.getDiaries());
     List<Diary> listDiaries = await DAO.getDiaries();
-    return listDiaries;
+    if (listDiaries.length != 0){
+      return listDiaries;
+    }
+    return new List<Diary>.filled(1, new Diary(0,'Let\'s create new Diary!',''));
   }
 
   // タブ切り替え
@@ -113,13 +115,13 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
         body: 
         TabBarView(
           controller: controller,
-          children: [
+          children: 
             // ダイアリーページ
-            GridView.count(
-              crossAxisCount: 3,
-              crossAxisSpacing: 2,
-              mainAxisSpacing: 0,
-              shrinkWrap: true,
+            // GridView.count(
+            //   crossAxisCount: 3,
+            //   crossAxisSpacing: 2,
+            //   mainAxisSpacing: 0,
+            //   shrinkWrap: true,
               // children: List.generate(
               //   listDiaries.length, (index) {
               //     return Container(
@@ -130,13 +132,13 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
               //     );
               //   }
               // )
-              children: <Widget>[
+              <Widget>[
                 FutureBuilder(
                   future: initializeDiary(),
                   builder: (context, AsyncSnapshot snapshot){
                     if (snapshot.hasData){
-
                       List<Diary> diary = snapshot.data as List<Diary>;
+                      
                       // final diaries = List.generate(diary.length, (index) {
                       //   return diary[index].image;
                       // });
@@ -163,15 +165,13 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
                         });
                         return _items;
                     }else{
-                      return Center(child: Text('please add new diary...'));
+                      return Container(child: Center(child: Text('please add new diary...')));
                       // TODO: ダイアリーがない場合、作成を促すダイアログを出す
                     }
                   },
-                )
-              ]
-            ),// マイページ
+                ),// マイページ
             _myPageItem(size)
-          ],
+            ]
         ),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: kLightGreen,
@@ -436,28 +436,18 @@ Widget _myPageEditItem(){
 // ダイアリー一覧画面
 Widget _messageItem(Diary dr, BuildContext context) {
   return Container(
-    decoration: new BoxDecoration(
-      border: new Border(bottom: BorderSide(width: 1.0, color: Colors.grey)),
-      color: kWhite,
-      image: DecorationImage(
-        image: (dr.image != null ? dr.image : AssetImage('images/sea.jpg')), // TODO: ダミーデータ表示
-        fit: BoxFit.cover,
-        colorFilter: ColorFilter.mode(kMossGreen.withOpacity(0.5), BlendMode.saturation)
-      ),
-    ),
     child: ListTile(
-      //leading: Icon(Icons.cake),
-      //Image.asset('images/sample.jpg'),
-      // title: Text(
-      //   diary.title,
-      //   style: TextStyle(
-      //     color:kWhite,
-      //     fontSize: 18.0,
-      //     fontStyle: FontStyle.italic
-      //   ),
-      // ),
-      //subtitle: Text(diary.memo),
-      //trailing: Icon(Icons.more_vert),
+      leading: Icon(Icons.cake),
+      title: Text(
+        dr.title,
+        style: TextStyle(
+          color:kBrown900,
+          fontSize: 18.0,
+          fontStyle: FontStyle.italic
+        ),
+      ),
+      subtitle: Text(dr.memo),
+      trailing: Icon(Icons.more_vert),
       contentPadding: EdgeInsets.all(10.0),
 
       onTap: () {

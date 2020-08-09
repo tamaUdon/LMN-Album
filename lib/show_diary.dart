@@ -1,5 +1,8 @@
 
 
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:albumapp/colors.dart';
 import 'package:albumapp/model/content.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +32,11 @@ class _ModalDiaryShowState extends State<ModalDiaryShow>{
     return formatter.format(datetime);
   }
 
+  Image _convertBase64ToImage(String _base64){
+    Uint8List bytes = new Base64Decoder().convert(_base64);
+    return new Image.memory(bytes);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +57,7 @@ class _ModalDiaryShowState extends State<ModalDiaryShow>{
               //border: new Border(bottom: BorderSide(width: 1.0, color: Colors.grey)),
               color: kWhite,
               image: DecorationImage(
-                image: myDiary.image.image,
+                image: Image.asset('assets/bar.jpg').image, // TODO:　ダミーデータ差し替え
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(Colors.blueGrey.withOpacity(0.5), BlendMode.saturation)
               ),
@@ -72,7 +80,8 @@ class _ModalDiaryShowState extends State<ModalDiaryShow>{
                     ),
                   ),
                   Text(
-                    _toFormattedDate(myDiary.date),
+                    //_toFormattedDate(myDiary.date),
+                    myDiary.date,
                     style: TextStyle(
                       color: kWhite,
                       fontSize: 18.0,

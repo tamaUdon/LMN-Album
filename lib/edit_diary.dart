@@ -37,24 +37,11 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
 
   // ダイアリー保存
   Future<void> _onOKTapped() async {
-    String base64Image;
-    // 画像変換
-    if (_image != null){
-      List<int> imageBytes = _image.readAsBytesSync();
-      base64Image = base64Encode(imageBytes);
-      print("画像がありました");
-    }else{
-      File imageFile = new File('images/sea.jpg');
-      List<int> imageBytes = imageFile.readAsBytesSync();
-      base64Image = base64Encode(imageBytes);
-      print("画像がnullでした");
-    }
     try {
       print("入力したタイトル: " + _titleController.text);
       print("入力したmemo: " + _memoController.text);
-      print("撮影した画像:" + base64Image);
       print("INSERTします...");
-      await DAO.insertDiary(new Diary(title: _titleController.text, memo: _memoController.text, image: base64Image));
+      await DAO.insertDiary(new Diary(0, _titleController.text, _memoController.text));
     }catch(e){
       print("could not insert diary...");
       // TODO: ここでINSERT失敗ダイアログ

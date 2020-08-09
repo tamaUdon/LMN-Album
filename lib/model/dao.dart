@@ -23,32 +23,33 @@ class DAO {
   }
 
   // DB初期化
-  static void initDB() async {
+  static Future<void> initDB() async {
     WidgetsFlutterBinding.ensureInitialized();
     database = openDatabase(
       join(await getDatabasesPath(), 'my_diaries.db'), // DB名: my_diaries
       // When the database is first created, create a table to store diaries.
       onCreate: (db, version) {
         return db.execute( // TABLE名: diaries
-          "CREATE TABLE diaries(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, memo TEXT, date TEXT, image TEXT)",
+          "CREATE TABLE diaries(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, memo TEXT, date TEXT)",
         );
       },
-      version: 2,
+      version: 3,
     );
   }
 
-  // REGISTER
+  // INSERT
   static Future<void> insertDiary(Diary diary) async {
     final Database db = await database;
     await db.insert(
       'diaries',
       diary.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: ConflictAlgorithm.ignore,
     );
   }
 
   // GET
   static Future<List<Diary>> getDiaries() async {
+
     // Get a reference to the database.
     final Database db = await database;
 
@@ -58,10 +59,9 @@ class DAO {
     // Convert the List<Map<String, dynamic> into a List<Diary>.
     return List.generate(maps.length, (i) {
       return Diary(
-        title: maps[i]['name'],
-        memo: maps[i]['age'],
-        date: maps[i]['date'],
-        image: maps[i]['image'],
+        0,
+        maps[i]['title'],
+        maps[i]['memo'],
       );
     });
   }
