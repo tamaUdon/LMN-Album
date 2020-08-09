@@ -49,13 +49,14 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
 
     try {
         _counter = await _getCurrentDiaryCount();
+        _counter++;
     }catch (e){
       print(e.toString());
       return false;
     }
 
     setState(() {
-      _setSuccessFlg = prefs.setInt("counter", _counter++).then((bool success) {
+      _setSuccessFlg = prefs.setInt("counter", _counter).then((bool success) {
         if (success){
           print("current diary id : " + _counter.toString());
           return true;
@@ -67,15 +68,6 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
     return _setSuccessFlg;
   } 
 
-  
-  // Future setImage() async {
-  //   final pickedFile = await picker.getImage(source: ImageSource.camera);
-
-  //   setState(() {
-  //     _image = File(pickedFile.path);
-  //   });
-  // }
-
   // ダイアリー保存
   Future<void> _onOKTapped() async {
     try {
@@ -84,7 +76,6 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
       print("INSERTします...");
       bool _success = await _addDiaryCounter();
       if (_success){
-        // 最初の日記
         int count = await _getCurrentDiaryCount();
         DAO.insertDiary(new Diary(count, _titleController.text, _memoController.text));
       }else{

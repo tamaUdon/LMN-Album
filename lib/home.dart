@@ -3,12 +3,8 @@ import 'package:albumapp/show_diary.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:path/path.dart' as Path;
-import 'package:sqflite/sqflite.dart';
 
-import 'dart:io' as Io;
 import 'dart:math' as math;
-import 'dart:convert';
 
 import 'model/content.dart';
 import 'model/dao.dart';
@@ -36,8 +32,6 @@ class StatefulHomePage extends StatefulWidget{
 
 class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerProviderStateMixin {
   TabController controller;
-  //Future<List<Diary>> listDiaries;
-  //List<Diary> listDiaries;
 
   @override
   void initState() {
@@ -64,7 +58,6 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
   // タブ切り替え
   void _onItemTapped(int index){
     setState(() {
-      //_selectedIndex = index;
       controller.index = index;
     });
   }
@@ -120,11 +113,19 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
                   builder: (context, AsyncSnapshot snapshot){
                     if (snapshot.hasData){
                       List<Diary> diary = snapshot.data as List<Diary>;
-                        var _items;
-                        List.generate(diary.length, (index){
-                          _items = _messageItem(diary[index], context);
-                        });
-                        return _items;
+                      // var _items;
+                      // List.generate(diary.length, (index){
+                      //   _items += _messageItem(diary[index], context);
+                      // });
+                      return ListView.separated(
+                        itemBuilder: (context, int index){
+                          return _messageItem(diary[index], context);
+                        },
+                        separatorBuilder: (BuildContext context, int index) {
+                          return separatorItem();
+                        },
+                        itemCount: diary.length,
+                      );//, separatorBuilder: null, itemCount: null)
                     }else{
                       return Container(child: Center(child: Text('please add new diary...')));
                       // TODO: ダイアリーがない場合、作成を促すダイアログを出す
@@ -199,7 +200,7 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
 }
 Widget separatorItem() {
   return Container(
-    height: 10,
+    height: 1,
     color: kButtonColor,
   );
 }

@@ -43,7 +43,7 @@ class DAO {
     await db.insert(
       'diaries',
       diary.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.ignore,
+      conflictAlgorithm: ConflictAlgorithm.rollback,
     );
   }
 
@@ -59,7 +59,7 @@ class DAO {
     // Convert the List<Map<String, dynamic> into a List<Diary>.
     return List.generate(maps.length, (i) {
       return Diary(
-        0,
+        maps[i]['id'],
         maps[i]['title'],
         maps[i]['memo'],
       );
