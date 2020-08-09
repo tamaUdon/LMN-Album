@@ -114,49 +114,12 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
         TabBarView(
           controller: controller,
           children: 
-            // ダイアリーページ
-            // GridView.count(
-            //   crossAxisCount: 3,
-            //   crossAxisSpacing: 2,
-            //   mainAxisSpacing: 0,
-            //   shrinkWrap: true,
-              // children: List.generate(
-              //   listDiaries.length, (index) {
-              //     return Container(
-              //       child: GridTile(
-              //         child: listDiaries[index].image,
-              //         footer: Text(listDiaries[index].date),
-              //       )
-              //     );
-              //   }
-              // )
               <Widget>[
                 FutureBuilder(
                   future: initializeDiary(),
                   builder: (context, AsyncSnapshot snapshot){
                     if (snapshot.hasData){
                       List<Diary> diary = snapshot.data as List<Diary>;
-                      
-                      // final diaries = List.generate(diary.length, (index) {
-                      //   return diary[index].image;
-                      // });
-                        // final diary = snapshot.data.map<Diary>((document) {
-                        //   try {
-                        //   return List.generate(document.length, (index){
-                        //     try {
-                        //       return Diary(title: document[index].title, memo: document[index].memo, image: document[index].image);
-                        //     }catch (e){
-                        //       print("cannot generate Diary... : " + e);
-                        //       return null;
-                        //     }
-                        //   });
-                        //   }catch (e){
-                        //     print("cannot generate List... : " + e);
-                        //     return null;
-                        //   }
-                        // }).toList();
-                        
-                        //return diary;
                         var _items;
                         List.generate(diary.length, (index){
                           _items = _messageItem(diary[index], context);
