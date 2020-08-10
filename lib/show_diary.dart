@@ -57,13 +57,23 @@ class _ModalDiaryShowState extends State<ModalDiaryShow>{
       appBar: AppBar(
         backgroundColor: kLightGreen,
         iconTheme: IconThemeData(color: kBrown900),
-        title: Text(
-          myDiary.title,
-          style: TextStyle(color: kBrown900),
+        title: Container(
+            child: Row(children: [
+              Text(
+                myDiary.title,
+                style: TextStyle(color: kBrown900),
+              ),
+              Spacer(),
+              IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: _onTapEdit,
+              ),
+            ]
+          ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.edit), 
-          onPressed: _onTapEdit,
+          icon: Icon(Icons.arrow_back), 
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Stack(

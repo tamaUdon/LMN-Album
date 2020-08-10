@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:albumapp/colors.dart';
 import 'package:albumapp/model/content.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +11,7 @@ import 'dart:async';
 
 import 'package:sqflite/sqflite.dart';
 
+import 'home.dart';
 import 'model/dao.dart';
 
 class ModalDiaryDetail extends StatefulWidget{
@@ -39,6 +41,48 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
       _titleController.text = widget.dr.title;
       _memoController.text = widget.dr.memo;
     }
+  }
+
+  // 削除ボタンを選択
+  void _onTapDelete(BuildContext context, Diary dr, String title, String msg){
+    showDialog(
+      context: context,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: Text(title),
+          content: Text(msg),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              child: Text("Delete"),
+              isDestructiveAction: true,
+              onPressed: () => {
+                setState(() {
+                  Navigator.pop(context);
+                  Navigator.pushReplacementNamed(context, '/home');
+                }),
+                _doDelete(context, dr),
+              }
+            ),
+            CupertinoDialogAction(
+              child: Text("Cancel"),
+              onPressed: () => _ontapCancel(context),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 削除実行
+  void _doDelete(BuildContext context, Diary dr) async {
+    await DAO.deleteDiary(dr.id);
+  }
+
+  // 削除キャンセル
+  void _ontapCancel(BuildContext context){
+    setState(() {
+      Navigator.pop(context);
+    });
   }
 
   // 日記の通し番号取得
@@ -125,10 +169,23 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
       appBar: AppBar(
         iconTheme: IconThemeData(color: kBrown900),
         backgroundColor: kLightGreen,
-        title: Text(
-          'New Diary',
-          style: TextStyle(color: kBrown900),
-        ),
+        title: Container(
+          child: 
+            Row(children: <Widget>[
+              Text(
+                'New Diary',
+                style: TextStyle(color: kBrown900),
+              ),
+              Spacer(),
+              IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () => { 
+                  _onTapDelete(context, widget.dr, 'Do you really want to delete this diary?', ''),
+                }
+              ),
+            ]
+          ),
+        )
       ),
       body: SafeArea(
         child: ListView(
@@ -159,45 +216,6 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
                     )
                   ),
                 ),
-                // MARK: - 画像ピッカー
-                // Padding(
-                //   padding: EdgeInsets.only(top: 10.0),
-                //   child: 
-                //   Card(
-                //     borderOnForeground: true,
-                //     child: Center(
-                //       child:
-                //       _image == null
-                //       // 画像ピッカーボタン
-                //       ? ButtonBar(
-                //         alignment: MainAxisAlignment.start,
-                //           children: <Widget>[
-                //             FlatButton(
-                //               child: 
-                //                 Text(
-                //                   'Tap to select image',
-                //                   style: TextStyle(
-                //                     color: kBrown900,
-                //                     fontWeight: FontWeight.w300,
-                //                   ),
-                //                 ),
-                //               onPressed: setImage,
-                //             )
-                //           ],
-                //         )
-                //       // 画像選択後、画像表示する => 再選択可
-                //       : ButtonBar(
-                //           children: <Widget>[
-                //             FlatButton(
-                //               onPressed: setImage,
-                //               child: Image.file(_image) 
-                //             ),
-                            
-                //           ],
-                //         ) 
-                //     ),
-                //   )
-                // )
               ]
             ),
             // OKボタン

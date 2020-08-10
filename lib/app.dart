@@ -39,6 +39,9 @@ class _AlbumAppState extends State<AlbumApp> {
         //backTitle: Text('MENU'),
       //),
       initialRoute: '/login',
+      routes: {
+        '/home': (_) => new HomePage(),
+      },
       onGenerateRoute: _getRoute,
       theme: _kShrineTheme,
     );
