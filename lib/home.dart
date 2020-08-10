@@ -4,6 +4,7 @@ import 'package:albumapp/utility.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dart:math' as math;
 
@@ -33,6 +34,7 @@ class StatefulHomePage extends StatefulWidget{
 
 class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerProviderStateMixin {
   TabController controller;
+  List<Diary> listDiaries;
 
   @override
   void initState() {
@@ -45,11 +47,33 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
     });
   }
 
+  // SharedPrefenrencesからユーザ情報を取得
+  Future<String> getUserInfo() async {
+    SharedPreferences _pref = await SharedPreferences.getInstance();
+    String _userName = _pref.getString('user_name');
+    if (_userName != null){
+      return _userName;
+    }else{
+      return '';
+    }
+  }
+
+  // ユーザ情報を登録
+  void setUserInfo(String userName) async {
+    SharedPreferences _pref = await SharedPreferences.getInstance();
+    _pref.setString('user_name', userName).then((bool success) => {
+      if (!success){
+        // TODO: 失敗ダイアログ出す
+      }
+    });
+  }
+
+  // DBの初期化
   Future<List<Diary>> initializeDiary() async{
     print("initializeDiary!");
     await DAO.initDB();
-    print(await DAO.getDiaries());
-    List<Diary> listDiaries = await DAO.getDiaries();
+    //print(await DAO.getDiaries());
+    listDiaries = await DAO.getDiaries();
     if (listDiaries.length != 0){
       return listDiaries;
     }
@@ -162,14 +186,14 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
 
   // マイページ編集ボタンタップ
   void _onEditMyPageTapped(){
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context){
-          return null;
-        },
-        fullscreenDialog: true
-      )
-    );
+    _showEditPage();
+  }
+
+  // マイページ編集画面
+  Widget _showEditPage(){
+    // ここでマイページを編集可能にする
+    // User -> TextFFieldにする
+    // Image -> Imagebuttonにする (オーバーレイで被せる)
   }
 
   @override
@@ -199,10 +223,6 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
                   builder: (context, AsyncSnapshot snapshot){
                     if (snapshot.hasData){
                       List<Diary> diary = snapshot.data as List<Diary>;
-                      // var _items;
-                      // List.generate(diary.length, (index){
-                      //   _items += _messageItem(diary[index], context);
-                      // });
                       return ListView.separated(
                         itemBuilder: (context, int index){
                           return _messageItem(diary[index], context);
@@ -211,7 +231,7 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
                           return separatorItem();
                         },
                         itemCount: diary.length,
-                      );//, separatorBuilder: null, itemCount: null)
+                      );
                     }else{
                       return Container(child: Center(child: Text('please add new diary...')));
                       // TODO: ダイアリーがない場合、作成を促すダイアログを出す
@@ -326,60 +346,106 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
               )
             ]
           ),
-          Padding(
-            padding: EdgeInsets.all(30.0),
-            child: Column(
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(Icons.person),
-                    Text(
-                      ' User: marika',
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        fontStyle: FontStyle.italic,
+          FutureBuilder(
+            future: getUserInfo(),
+              builder: (context, snapshot){
+                if (snapshot.hasData){
+                  return Padding(
+                    padding: EdgeInsets.only(top: 30.0),
+                    child: 
+                      Column(
+                        children: <Widget>[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(Icons.person),
+                              Text(
+                                ' User: ' + snapshot.data,
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              )
+                            ],
+                          ),
+                        ]
                       ),
-                    )
-                  ],
-                ),
-                Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(Icons.library_books),
-                      Text(
-                        ' Diaries: 6',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(Icons.calendar_today),
-                    Text(
-                      ' From: 2020/07/23',
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        fontStyle: FontStyle.italic,
+                    );
+                }else{
+                  return Container(
+                    child: 
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(Icons.person),
+                          Text(
+                            ' User: ' + '',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          )
+                        ],
                       ),
+                    );
+                  }
+                }
+              ), 
+
+                FutureBuilder(
+                  future: initializeDiary(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData){
+                      List<Diary> dr = snapshot.data as List<Diary>;
+                      DateTime _startDate = DateTime.parse(dr[0].date).toLocal();
+                      return Container(
+                        child:
+                          Column(
+                            children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: 
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Icon(Icons.library_books),
+                                      Text(
+                                        ' Diaries: ' + dr.length.toString(),
+                                        style: TextStyle(
+                                          fontSize: 18.0,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Icon(Icons.calendar_today),
+                                    Text(
+                                      ' From: ' + '${_startDate.year}/${_startDate.month}/${_startDate.day}',
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    )
+                                  ],
+                                )
+                              ]
+                            )
+                          );      
+                        }else{
+                          return Container(
+                            child: Center(child: Text('loading...')),
+                          );
+                        }
+                      },
                     )
                   ],
                 )
-              ],
-            ),
-          )
-        ]
-      ),
-    );
-  }
+              ); 
+            }
 
   //　マイページ編集画面
   Widget _myPageEditItem(){
