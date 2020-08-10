@@ -43,7 +43,7 @@ class _AlbumAppState extends State<AlbumApp> {
         '/home': (_) => new HomePage(),
       },
       onGenerateRoute: _getRoute,
-      theme: _kShrineTheme,
+      theme: _kLemonTheme,
     );
   }
 
@@ -67,7 +67,7 @@ Route<dynamic> _getRoute(RouteSettings settings) {
   );
 }
 
-final ThemeData _kShrineTheme = _buildTheme();
+final ThemeData _kLemonTheme = _buildTheme();
 
 IconThemeData _customIconTheme(IconThemeData original) {
   return original.copyWith(color: kBrown900);
@@ -78,7 +78,7 @@ ThemeData _buildTheme() {
   return base.copyWith(
     accentColor: kBrown900,
     primaryColor: kLightGreen,
-    scaffoldBackgroundColor: kLightGreen,
+    scaffoldBackgroundColor: Colors.transparent,
     cardColor: kWhite,
     textSelectionColor: kMossGreen,
     errorColor: kErrorRed,

@@ -25,9 +25,10 @@ class ModalDiaryShow extends StatefulWidget{
 class _ModalDiaryShowState extends State<ModalDiaryShow>{
   Diary myDiary;
   GradColors gradations = new GradColors();
-
+  DateTime myDiaryDate;
   _ModalDiaryShowState(diary){
     myDiary = diary;
+    myDiaryDate = DateTime.parse(myDiary.date);
   }
 
   String _toFormattedDate(DateTime datetime){
@@ -115,7 +116,7 @@ class _ModalDiaryShowState extends State<ModalDiaryShow>{
                     ),
                     Text(
                       //_toFormattedDate(myDiary.date),
-                      myDiary.date,
+                      '${myDiaryDate.year}/${myDiaryDate.month}/${myDiaryDate.day} ${myDiaryDate.hour}:${myDiaryDate.second}:${myDiaryDate.millisecond}',
                       style: TextStyle(
                         color: kWhite,
                         fontSize: 18.0,
