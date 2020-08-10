@@ -1,5 +1,6 @@
 import 'package:albumapp/colors.dart';
 import 'package:albumapp/show_diary.dart';
+import 'package:albumapp/utility.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -56,11 +57,12 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
   }
 
   // 編集ボタンタップ
-  void _onTapMore(){
-    _showCupertinoActionSheet(context);
+  void _onTapMore(Diary dr){
+    _showCupertinoActionSheet(context, dr);
   }
 
-  void _showCupertinoActionSheet(BuildContext context) {
+  // 編集・削除アクションシート表示
+  void _showCupertinoActionSheet(BuildContext context, Diary dr) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) {
@@ -68,12 +70,58 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
           message: Text("Select Your Action"),
           actions: <Widget>[
             CupertinoActionSheetAction(child: Text("EDIT"), onPressed: () { Navigator.pop(context); },),
-            CupertinoActionSheetAction(child: Text("DELETE"), onPressed: () { Navigator.pop(context); }, isDestructiveAction: true,),
+            CupertinoActionSheetAction(
+               child: Text("DELETE"), onPressed: () => {
+                _onTapDelete(context, dr, 'Do you really want to delete this diary?', ''),
+               },
+                isDestructiveAction: true,
+              ),
           ],
           cancelButton: CupertinoActionSheetAction(child: Text("Cancel"), onPressed: () { Navigator.pop(context); },),
         );
       }
     );
+  }
+
+  // アクションシートの削除ボタンを選択
+  void _onTapDelete(BuildContext context, Diary dr, String title, String msg){
+    showDialog(
+      context: context,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: Text(title),
+          content: Text(msg),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              child: Text("Delete"),
+              isDestructiveAction: true,
+              onPressed: () => _doDelete(context, dr),
+            ),
+            CupertinoDialogAction(
+              child: Text("Cancel"),
+              onPressed: () => _ontapCancel(context),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 削除実行
+  void _doDelete(BuildContext context, Diary dr) async {
+    await DAO.deleteDiary(dr.id);
+    setState(() {
+      Navigator.pop(context);
+      Navigator.pop(context);
+    });
+  }
+
+  // 削除キャンセル
+  void _ontapCancel(BuildContext context){
+    setState(() {
+      Navigator.pop(context);
+      Navigator.pop(context);
+    });
   }
 
   // タブ切り替え
@@ -88,9 +136,9 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
     Navigator.of(context).push(
       CupertinoPageRoute(
         builder: (BuildContext context){
-          return ModalDiaryDetail();
-        },
-        fullscreenDialog: true
+        return ModalDiaryDetail();
+      },
+      fullscreenDialog: true
       )
     );
   }
@@ -432,7 +480,7 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
         subtitle: Text(dr.memo),
         trailing: IconButton(
           icon: Icon(Icons.more_vert),
-          onPressed: _onTapMore,
+          onPressed: () => _onTapMore(dr),
         ),
         contentPadding: EdgeInsets.all(10.0),
 

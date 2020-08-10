@@ -87,13 +87,17 @@ class DAO {
     // Get a reference to the database.
     final db = await database;
 
-    // Remove the Diary from the database.
-    await db.delete(
-      'diaries',
-      // Use a `where` clause to delete a specific diary.
-      where: "id = ?",
-      // Pass the Diary's id as a whereArg to prevent SQL injection.
-      whereArgs: [id],
-    );
+    try {
+      // Remove the Diary from the database.
+      await db.delete(
+        'diaries',
+        // Use a `where` clause to delete a specific diary.
+        where: "id = ?",
+        // Pass the Diary's id as a whereArg to prevent SQL injection.
+        whereArgs: [id],
+      );
+    } catch (e){
+      print(e.toString());
+    }
   }
 }
