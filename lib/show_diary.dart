@@ -5,10 +5,13 @@ import 'dart:typed_data';
 
 import 'package:albumapp/colors.dart';
 import 'package:albumapp/model/content.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import "package:intl/intl.dart";
 import 'package:intl/date_symbol_data_local.dart';
+
+import 'edit_diary.dart';
 
 class ModalDiaryShow extends StatefulWidget{
   Diary myDiary;
@@ -37,6 +40,17 @@ class _ModalDiaryShowState extends State<ModalDiaryShow>{
     return new Image.memory(bytes);
   }
 
+  void _onTapEdit(){
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (BuildContext context){
+          return ModalDiaryDetail.construct(widget.myDiary);
+        },
+        fullscreenDialog: true
+      )
+    );
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,6 +61,10 @@ class _ModalDiaryShowState extends State<ModalDiaryShow>{
           myDiary.title,
           style: TextStyle(color: kBrown900),
         ),
+        leading: IconButton(
+          icon: Icon(Icons.edit), 
+          onPressed: _onTapEdit,
+        ),
       ),
       body: Stack(
         alignment: Alignment.center,
@@ -54,7 +72,6 @@ class _ModalDiaryShowState extends State<ModalDiaryShow>{
           Container(
             constraints: BoxConstraints.expand(),
             decoration: new BoxDecoration(
-              //border: new Border(bottom: BorderSide(width: 1.0, color: Colors.grey)),
               color: kWhite,
               image: DecorationImage(
                 image: Image.asset('assets/bar.jpg').image, // TODO:　ダミーデータ差し替え
