@@ -1,3 +1,4 @@
+import 'package:albumapp/colors.dart';
 import 'package:albumapp/home.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -136,6 +137,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     print("login : build");
     return Scaffold(
+      backgroundColor: kLightGreen,
       body: SafeArea(
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: 30.0),

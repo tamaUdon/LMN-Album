@@ -24,6 +24,7 @@ class ModalDiaryShow extends StatefulWidget{
 
 class _ModalDiaryShowState extends State<ModalDiaryShow>{
   Diary myDiary;
+  GradColors gradations = new GradColors();
 
   _ModalDiaryShowState(diary){
     myDiary = diary;
@@ -76,51 +77,58 @@ class _ModalDiaryShowState extends State<ModalDiaryShow>{
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          Container(
-            constraints: BoxConstraints.expand(),
-            decoration: new BoxDecoration(
-              color: kWhite,
-              image: DecorationImage(
-                image: Image.asset('assets/bar.jpg').image, // TODO:　ダミーデータ差し替え
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(Colors.blueGrey.withOpacity(0.5), BlendMode.saturation)
-              ),
-            ),
+      body: 
+        Container(
+          decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: FractionalOffset.topLeft,
+            end: FractionalOffset.bottomRight,
+            colors: [
+              gradations.pairStore[widget.myDiary.id%5].base,
+              gradations.pairStore[widget.myDiary.id%5].spread,
+            ],
+            stops: const [
+              0.0,
+              1.0,
+            ],
           ),
-          Align(
-            alignment: Alignment.center,
-            child: 
-            Center(
+        ),
+      child: 
+        Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Align(
+              alignment: Alignment.center,
               child: 
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    myDiary.memo,
-                    style: TextStyle(
-                      color: kWhite,
-                      fontSize: 18.0,
-                      fontStyle: FontStyle.italic,
+              Center(
+                child: 
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      myDiary.memo,
+                      style: TextStyle(
+                        color: kWhite,
+                        fontSize: 18.0,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
-                  ),
-                  Text(
-                    //_toFormattedDate(myDiary.date),
-                    myDiary.date,
-                    style: TextStyle(
-                      color: kWhite,
-                      fontSize: 18.0,
-                      fontStyle: FontStyle.italic,
+                    Text(
+                      //_toFormattedDate(myDiary.date),
+                      myDiary.date,
+                      style: TextStyle(
+                        color: kWhite,
+                        fontSize: 18.0,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
-                  ),
-                ]
-              ),
+                  ]
+                ),
+              )
             )
-          )
-        ],
-      ),
+          ],
+        ),
+      )
     );
   }
 }
