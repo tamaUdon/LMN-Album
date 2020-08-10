@@ -5,7 +5,6 @@ import 'package:albumapp/colors.dart';
 import 'package:albumapp/model/content.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
@@ -29,7 +28,6 @@ class ModalDiaryDetail extends StatefulWidget{
 }
 
 class _ModalDiarydetailState extends State<ModalDiaryDetail>{
-  final picker = ImagePicker();
   final _titleController = new TextEditingController();
   final _memoController = new TextEditingController();
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
