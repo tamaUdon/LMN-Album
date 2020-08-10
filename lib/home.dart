@@ -69,7 +69,12 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
         return CupertinoActionSheet(
           message: Text("Select Your Action"),
           actions: <Widget>[
-            CupertinoActionSheetAction(child: Text("EDIT"), onPressed: () { Navigator.pop(context); },),
+            CupertinoActionSheetAction(
+              child: Text("EDIT"), onPressed: ()  => { 
+                Navigator.pop(context),
+                _onTapEdit(dr),
+              },
+            ),
             CupertinoActionSheetAction(
                child: Text("DELETE"), onPressed: () => {
                 _onTapDelete(context, dr, 'Do you really want to delete this diary?', ''),
@@ -122,6 +127,18 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
       Navigator.pop(context);
       Navigator.pop(context);
     });
+  }
+
+  // 編集ボタンタップ
+  void _onTapEdit(Diary dr){
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (BuildContext context){
+          return ModalDiaryDetail.construct(dr);
+        },
+        fullscreenDialog: true
+      )
+    );
   }
 
   // タブ切り替え

@@ -13,12 +13,20 @@ import 'package:sqflite/sqflite.dart';
 import 'model/dao.dart';
 
 class ModalDiaryDetail extends StatefulWidget{
+  Diary dr;
+
+  ModalDiaryDetail(){
+    this.dr = null;
+  }
+  ModalDiaryDetail.construct(Diary dr){
+    this.dr = dr;
+  }
+
   @override
   _ModalDiarydetailState createState() => _ModalDiarydetailState();
 }
 
 class _ModalDiarydetailState extends State<ModalDiaryDetail>{
-  File _image;
   final picker = ImagePicker();
   final _titleController = new TextEditingController();
   final _memoController = new TextEditingController();
@@ -27,17 +35,19 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
   @override
   void initState(){
     super.initState();
+    if (widget.dr != null){
+      _titleController.text = widget.dr.title;
+      _memoController.text = widget.dr.memo;
+    }
   }
 
   // 日記の通し番号取得
   Future<int> _getCurrentDiaryCount() async {
     Future<int> _counter;
 
-    //setState(() {
-      _counter = _prefs.then((SharedPreferences prefs) {
-        return (prefs.getInt('counter') ?? 0);
-      });
-    //});
+    _counter = _prefs.then((SharedPreferences prefs) {
+      return (prefs.getInt('counter') ?? 0);
+    });
     return _counter;
   }
 
@@ -73,8 +83,26 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
     try {
       print("入力したタイトル: " + _titleController.text);
       print("入力したmemo: " + _memoController.text);
-      print("INSERTします...");
-      bool _success = await _addDiaryCounter();
+
+      if (widget.dr != null){
+        print("UPDATEします...");
+        await _doUpdate(widget.dr);
+      }else{
+        print("INSERTします...");
+        await _doInsert();
+      }
+
+    }catch(e){
+      print("INSERTもしくはUPDATEに失敗しました");
+      // TODO: ここでINSERT失敗ダイアログ
+    }
+    print("INSERT成功");
+    Navigator.of(context).pop(); // TODO: ここで戻った先のhome.dartに引数を渡して画面を再描画させる
+  }
+
+  // 新規登録
+  Future<void> _doInsert() async {
+    bool _success = await _addDiaryCounter();
       if (_success){
         int count = await _getCurrentDiaryCount();
         DAO.insertDiary(new Diary(count, _titleController.text, _memoController.text));
@@ -83,12 +111,11 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
         return;
         // TODO: ここでINSERT失敗ダイアログ
       }
-    }catch(e){
-      print("could not insert diary...");
-      // TODO: ここでINSERT失敗ダイアログ
-    }
-    print("INSERT成功");
-    Navigator.of(context).pop(); // TODO: ここで戻った先のhome.dartに引数を渡して画面を再描画させる
+  }
+
+  // 編集内容を保存
+  Future<void> _doUpdate(Diary dr){
+    DAO.updateDiary(new Diary(dr.id, _titleController.text, _memoController.text));
   }
 
   @override
