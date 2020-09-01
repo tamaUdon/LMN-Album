@@ -138,7 +138,7 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
       print("INSERTもしくはUPDATEに失敗しました");
       // TODO: ここでINSERT失敗ダイアログ
     }
-    print("INSERT成功");
+    print("INSERT or UPDATE 成功");
     Navigator.of(context).pop(); // TODO: ここで戻った先のhome.dartに引数を渡して画面を再描画させる
   }
 
@@ -147,7 +147,7 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
     bool _success = await _addDiaryCounter();
       if (_success){
         int count = await _getCurrentDiaryCount();
-        DAO.insertDiary(new Diary(count, _titleController.text, _memoController.text));
+        await DAO.insertDiary(new Diary(count, _titleController.text, _memoController.text));
       }else{
         print("日記カウントアップに失敗しました");
         return;
@@ -156,7 +156,7 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
   }
 
   // 編集内容を保存
-  Future<void> _doUpdate(Diary dr){
+  Future<void> _doUpdate(Diary dr) async {
     DAO.updateDiary(new Diary(dr.id, _titleController.text, _memoController.text));
   }
 

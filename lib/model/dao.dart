@@ -66,6 +66,36 @@ class DAO {
     });
   }
 
+  // GET
+  static Future<List<Diary>> get5Diaries(int id) async {
+
+    // Get a reference to the database.
+    final Database db = await database;
+
+    // Query the table for all The Diaries.
+    final List<Map<String, dynamic>> maps = await db.query('diaries', limit: 5, offset: id);
+
+    if (maps.length < 1)
+    {
+      return null;
+      // return List.generate(1, (i) {
+      // return Diary(
+      //   0,
+      //   'Please Add New Diary...',
+      //   '',
+      // );
+      //});
+    }
+    // Convert the List<Map<String, dynamic> into a List<Diary>.
+    return List.generate(maps.length, (i) {
+      return Diary(
+        maps[i]['id'],
+        maps[i]['title'],
+        maps[i]['memo'],
+      );
+    });
+  }
+
   // UPDATE
   static Future<void> updateDiary(Diary diary) async {
     // Get a reference to the database.

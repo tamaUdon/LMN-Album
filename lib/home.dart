@@ -1,6 +1,6 @@
 import 'package:albumapp/colors.dart';
 import 'package:albumapp/show_diary.dart';
-import 'package:albumapp/utility.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -35,12 +35,18 @@ class StatefulHomePage extends StatefulWidget{
 class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerProviderStateMixin {
   TabController controller;
   List<Diary> listDiaries;
+  RefreshController _refreshController;
 
   @override
   void initState() {
-    print("home: initState!");
+    listDiaries = [];
+    //listDiaries.add(new Diary(0,'Add new Diary...',''));
+    print("home: initState!"); 
+
     super.initState();
 
+    _refreshController =
+      RefreshController();
     controller = TabController(length: 2, vsync: this);
     controller.addListener(() {
       setState(() {});
@@ -71,13 +77,31 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
   // DBの初期化
   Future<List<Diary>> initializeDiary() async{
     print("initializeDiary!");
+    print("現在のlistDiaries : " + listDiaries.toString());
     await DAO.initDB();
-    //print(await DAO.getDiaries());
-    listDiaries = await DAO.getDiaries();
-    if (listDiaries.length != 0){
+
+    if (listDiaries.length < 1)
+    {
+      listDiaries = [];
+      var dr = await DAO.get5Diaries(0);
+      _refreshController.requestLoading(needMove: false, duration: Duration(microseconds: 300), curve: Curves.linear);
+
+      if (dr == null)
+      {
+        // 日記が登録されていない
+        print("drもnull : listDiariesもnull");
+        listDiaries.add(new Diary(0,'test',''));
+        print("listDiariesにdummy追加しました");
+        return listDiaries;
+
+      }else{
+        // 日記が登録されている
+        listDiaries = dr;
+        return listDiaries;
+      }
+    }else{
       return listDiaries;
     }
-    return new List<Diary>.filled(1, new Diary(0,'Let\'s create new Diary!',''));
   }
 
   // 編集ボタンタップ
@@ -196,6 +220,36 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
     // Image -> Imagebuttonにする (オーバーレイで被せる)
   }
 
+  // 読み込み
+  void _onLoading() async{
+
+    await Future.delayed(Duration(milliseconds: 1000));
+
+    List<Diary> tList = await DAO.getDiaries();
+    print("tList.length: " + tList.length.toString());
+    print("listDiaries.length: " + listDiaries.length.toString());
+
+    if (tList.length <= listDiaries.length-1){
+      _refreshController.loadNoData();
+      return;
+    }
+
+    List<Diary> dList = await DAO.get5Diaries(listDiaries.length);
+
+    if (dList == null)
+    {
+      _refreshController.loadNoData();
+    }else{
+      // 日記の中身がある
+      if(mounted)
+          // ここでFutureBuilerが発火する
+          setState(() {
+            listDiaries += dList;
+          });
+      _refreshController.loadComplete();
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -214,34 +268,68 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
           backgroundColor: kLightGreen,
         ),
         body: 
-        TabBarView(
-          controller: controller,
-          children: 
-              <Widget>[
-                FutureBuilder(
-                  future: initializeDiary(),
-                  builder: (context, AsyncSnapshot snapshot){
-                    if (snapshot.hasData){
-                      List<Diary> diary = snapshot.data as List<Diary>;
-                      return ListView.separated(
-                        itemBuilder: (context, int index){
-                          return _messageItem(diary[index], context);
-                        },
-                        separatorBuilder: (BuildContext context, int index) {
-                          return separatorItem();
-                        },
-                        itemCount: diary.length,
+        // TabBarView(
+        //   controller: controller,
+        //   children: 
+        //       <Widget>[
+                IndexedStack(
+                  index: controller.index,
+                  children: <Widget>[
+                SmartRefresher(
+                  enablePullDown: false,
+                  enablePullUp: true,
+                  header: WaterDropHeader(),
+                  footer: CustomFooter(
+                    builder: (BuildContext context,LoadStatus mode){
+                      Widget body ;
+                      if(mode==LoadStatus.idle){
+                        body =  Text("pull up load");
+                      }
+                      else if(mode==LoadStatus.loading){
+                        body =  CupertinoActivityIndicator();
+                      }
+                      else if(mode == LoadStatus.failed){
+                        body = Text("Load Failed!Click retry!");
+                      }
+                      else if(mode == LoadStatus.canLoading){
+                          body = Text("release to load more");
+                      }
+                      else{
+                        body = Text("No more Data");
+                      }
+                      return Container(
+                        height: 55.0,
+                        child: Center(child:body),
                       );
-                    }else{
-                      return Container(child: Center(child: Text('please add new diary...')));
-                      // TODO: ダイアリーがない場合、作成を促すダイアログを出す
-                    }
-                  },
-                ),// マイページ
-            _myPageItem(size)
-            ]
-        ),
-        bottomNavigationBar: BottomNavigationBar(
+                    },
+                  ),
+                  controller: _refreshController,
+                  onLoading: _onLoading,
+                  child: ListView.builder(
+                          itemBuilder: (c,i) => FutureBuilder( // iは５
+                          future: initializeDiary(),
+                          builder: (context, AsyncSnapshot snapshot){
+                            if (snapshot.hasData){
+                              //List<Diary> diary = snapshot.data as List<Diary>;
+                              print("FutureBuilder発火" + listDiaries.toString());
+                              return listDiaries.length > i ? _messageItem(listDiaries[i], context) : Scaffold();
+                            }else{
+                              return Container(child: Center(child: Text('please add new diary...')));
+                              // TODO: ダイアリーがない場合、作成を促すダイアログを出す
+                            }
+                          },
+                        ),
+                        itemExtent: 100.0,
+                        itemCount: listDiaries.length,
+                      ),
+                    ), 
+                    _myPageItem(size), 
+                  ],
+                ),
+                // マイページ
+              //],
+          //),
+          bottomNavigationBar: BottomNavigationBar(
           backgroundColor: kLightGreen,
           selectedItemColor: kAccentBlue,
           unselectedItemColor: kShadowGreen,
@@ -249,7 +337,6 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
           onTap: _onItemTapped,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-
               icon: Icon(Icons.format_list_bulleted),
               title: Text('diary'),
             ),
@@ -347,105 +434,59 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
             ]
           ),
           FutureBuilder(
-            future: getUserInfo(),
-              builder: (context, snapshot){
-                if (snapshot.hasData){
-                  return Padding(
-                    padding: EdgeInsets.only(top: 30.0),
-                    child: 
-                      Column(
-                        children: <Widget>[
+            future: initializeDiary(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData){
+                List<Diary> dr = snapshot.data as List<Diary>;
+                DateTime _startDate = DateTime.parse(dr[0].date).toLocal();
+                return Container(
+                  child:
+                    Column(
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.all(30.0),
+                          child: 
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Icon(Icons.library_books),
+                                Text(
+                                  ' Diaries: ' + dr.length.toString(),
+                                  style: TextStyle(
+                                    fontSize: 18.0,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              Icon(Icons.person),
+                              Icon(Icons.calendar_today),
                               Text(
-                                ' User: ' + snapshot.data,
+                                ' From: ' + '${_startDate.year}/${_startDate.month}/${_startDate.day}',
                                 style: TextStyle(
                                   fontSize: 18.0,
                                   fontStyle: FontStyle.italic,
                                 ),
                               )
                             ],
-                          ),
-                        ]
-                      ),
-                    );
-                }else{
-                  return Container(
-                    child: 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(Icons.person),
-                          Text(
-                            ' User: ' + '',
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontStyle: FontStyle.italic,
-                            ),
                           )
-                        ],
-                      ),
+                        ]
+                      )
+                    );      
+                  }else{
+                    return Container(
+                      child: Center(child: Text('loading...')),
                     );
                   }
-                }
-              ), 
-
-                FutureBuilder(
-                  future: initializeDiary(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData){
-                      List<Diary> dr = snapshot.data as List<Diary>;
-                      DateTime _startDate = DateTime.parse(dr[0].date).toLocal();
-                      return Container(
-                        child:
-                          Column(
-                            children: <Widget>[
-                              Padding(
-                                padding: EdgeInsets.all(20.0),
-                                child: 
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: <Widget>[
-                                      Icon(Icons.library_books),
-                                      Text(
-                                        ' Diaries: ' + dr.length.toString(),
-                                        style: TextStyle(
-                                          fontSize: 18.0,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Icon(Icons.calendar_today),
-                                    Text(
-                                      ' From: ' + '${_startDate.year}/${_startDate.month}/${_startDate.day}',
-                                      style: TextStyle(
-                                        fontSize: 18.0,
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    )
-                                  ],
-                                )
-                              ]
-                            )
-                          );      
-                        }else{
-                          return Container(
-                            child: Center(child: Text('loading...')),
-                          );
-                        }
-                      },
-                    )
-                  ],
-                )
-              ); 
-            }
+                },
+              )
+            ],
+          )
+        ); 
+      }
 
   //　マイページ編集画面
   Widget _myPageEditItem(){

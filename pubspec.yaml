@@ -23,7 +23,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  image_picker:
+  characters: 
+  pull_to_refresh: ^1.6.0
+  gradient_app_bar:
   path: 
   sqflite:
   build_runner: 
