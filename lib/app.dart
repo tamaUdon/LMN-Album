@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/widgets.dart';
-
 import 'dart:async';
 
 import 'backdrop.dart';

@@ -1,5 +1,6 @@
 import 'package:albumapp/colors.dart';
 import 'package:albumapp/show_diary.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,15 +15,18 @@ import 'edit_diary.dart';
 
 class HomePage extends StatelessWidget {
   static const String _title = 'LeMoN';
+  TabController controller;
+  RefreshController _refreshController;
+  List<Diary> listDiaries;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: _title,
-      home: StatefulHomePage()
-    );
+      home: StatefulHomePage(),
+      );
+    }
   }
-}
 
 class StatefulHomePage extends StatefulWidget{
   StatefulHomePage({Key key}) : super(key: key);
@@ -34,8 +38,8 @@ class StatefulHomePage extends StatefulWidget{
 
 class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerProviderStateMixin {
   TabController controller;
-  List<Diary> listDiaries;
   RefreshController _refreshController;
+  List<Diary> listDiaries;
 
   @override
   void initState() {
@@ -74,7 +78,7 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
     });
   }
 
-  // DBの初期化
+  // // DBの初期化
   Future<List<Diary>> initializeDiary() async{
     print("initializeDiary!");
     print("現在のlistDiaries : " + listDiaries.toString());
@@ -242,7 +246,6 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
     }else{
       // 日記の中身がある
       if(mounted)
-          // ここでFutureBuilerが発火する
           setState(() {
             listDiaries += dList;
           });
@@ -268,67 +271,55 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
           backgroundColor: kLightGreen,
         ),
         body: 
-        // TabBarView(
-        //   controller: controller,
-        //   children: 
-        //       <Widget>[
-                IndexedStack(
-                  index: controller.index,
-                  children: <Widget>[
-                SmartRefresher(
-                  enablePullDown: false,
-                  enablePullUp: true,
-                  header: WaterDropHeader(),
-                  footer: CustomFooter(
-                    builder: (BuildContext context,LoadStatus mode){
-                      Widget body ;
-                      if(mode==LoadStatus.idle){
-                        body =  Text("pull up load");
-                      }
-                      else if(mode==LoadStatus.loading){
-                        body =  CupertinoActivityIndicator();
-                      }
-                      else if(mode == LoadStatus.failed){
-                        body = Text("Load Failed!Click retry!");
-                      }
-                      else if(mode == LoadStatus.canLoading){
-                          body = Text("release to load more");
-                      }
-                      else{
-                        body = Text("No more Data");
-                      }
-                      return Container(
-                        height: 55.0,
-                        child: Center(child:body),
-                      );
-                    },
+          IndexedStack(
+            index: controller.index,
+            children: <Widget>[
+          SmartRefresher(
+            enablePullDown: false,
+            enablePullUp: true,
+            header: WaterDropHeader(),
+            footer: CustomFooter(
+              builder: (BuildContext context,LoadStatus mode){
+                Widget body ;
+                if(mode==LoadStatus.idle){
+                  body =  Text("pull up load");
+                }
+                else if(mode==LoadStatus.loading){
+                  body =  CupertinoActivityIndicator();
+                }
+                else if(mode == LoadStatus.failed){
+                  body = Text("Load Failed!Click retry!");
+                }
+                else if(mode == LoadStatus.canLoading){
+                    body = Text("release to load more");
+                }
+                else{
+                  body = Text("No more Data");
+                }
+                return Container(
+                  height: 55.0,
+                  child: Center(child:body),
+                );
+              },
+            ),
+            controller: _refreshController,
+            onLoading: _onLoading,
+            child: ListView.builder(
+                  itemBuilder: (c,i) => FutureProvider<Diary>(
+                    create: (_) => initializeDiary().then((value) => value[i]),
+                    initialData: new Diary(0, "Please add new diary!", ""),
+                    child: _messageItem(),
                   ),
-                  controller: _refreshController,
-                  onLoading: _onLoading,
-                  child: ListView.builder(
-                          itemBuilder: (c,i) => FutureBuilder( // iは５
-                          future: initializeDiary(),
-                          builder: (context, AsyncSnapshot snapshot){
-                            if (snapshot.hasData){
-                              //List<Diary> diary = snapshot.data as List<Diary>;
-                              print("FutureBuilder発火" + listDiaries.toString());
-                              return listDiaries.length > i ? _messageItem(listDiaries[i], context) : Scaffold();
-                            }else{
-                              return Container(child: Center(child: Text('please add new diary...')));
-                              // TODO: ダイアリーがない場合、作成を促すダイアログを出す
-                            }
-                          },
-                        ),
-                        itemExtent: 100.0,
-                        itemCount: listDiaries.length,
-                      ),
-                    ), 
-                    _myPageItem(size), 
-                  ],
+                  itemExtent: 100.0,
+                  itemCount: listDiaries.length,
                 ),
-                // マイページ
-              //],
-          //),
+              ), 
+              _myPageItem(size), 
+            ],
+          ),
+          // 
+          // マイページ
+          //
           bottomNavigationBar: BottomNavigationBar(
           backgroundColor: kLightGreen,
           selectedItemColor: kAccentBlue,
@@ -433,56 +424,14 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
               )
             ]
           ),
-          FutureBuilder(
-            future: initializeDiary(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData){
-                List<Diary> dr = snapshot.data as List<Diary>;
-                DateTime _startDate = DateTime.parse(dr[0].date).toLocal();
-                return Container(
-                  child:
-                    Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.all(30.0),
-                          child: 
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Icon(Icons.library_books),
-                                Text(
-                                  ' Diaries: ' + dr.length.toString(),
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Icon(Icons.calendar_today),
-                              Text(
-                                ' From: ' + '${_startDate.year}/${_startDate.month}/${_startDate.day}',
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              )
-                            ],
-                          )
-                        ]
-                      )
-                    );      
-                  }else{
-                    return Container(
-                      child: Center(child: Text('loading...')),
-                    );
-                  }
-                },
-              )
+          ///
+          /// マイページの中身
+          ///
+          FutureProvider<List<Diary>>(
+                create: (_) => initializeDiary(),
+                initialData: new List<Diary>.empty(),
+                child: _myPageContents(),
+              ),
             ],
           )
         ); 
@@ -589,7 +538,8 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
   }
 
   // ダイアリー一覧画面
-  Widget _messageItem(Diary dr, BuildContext context) {
+  Widget _messageItem() {
+    final dr = Provider.of<Diary>(context);
     return Container(
       child: ListTile(
         leading: Icon(Icons.cake),
@@ -624,5 +574,47 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
         }, // 長押し
       ),
     );
+  }
+
+  Widget _myPageContents()
+  {
+    List<Diary> dr = Provider.of(context);
+    DateTime _startDate =  dr[0] != null ? DateTime.parse(dr[0].date).toLocal() : DateTime.now();
+
+    return 
+    Container(child: 
+      Column(children: <Widget>[ 
+        Padding(
+          padding: EdgeInsets.all(30.0),
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(Icons.library_books),
+                Text(
+                  ' Diaries: ' + dr.length.toString(),
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontStyle: FontStyle.italic,
+                  ),
+                )
+              ],
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(Icons.calendar_today),
+              Text(
+                ' From: ' + '${_startDate.year}/${_startDate.month}/${_startDate.day}',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontStyle: FontStyle.italic,
+                ),
+              )
+            ],
+          )
+        ]
+      )
+    );   
   }
 }
