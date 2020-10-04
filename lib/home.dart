@@ -78,17 +78,27 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
     });
   }
 
-  // // DBの初期化
-  Future<List<Diary>> initializeDiary() async{
+  // DBの初期化
+  Future<List<Diary>> initializeDiary({bool flg = false}) async{
     print("initializeDiary!");
     print("現在のlistDiaries : " + listDiaries.toString());
-    await DAO.initDB();
 
+    if (!flg)
+    {
+      await DAO.initDB();
+    }
+
+    return checkDiaryIsExist();
+  }
+
+  Future<List<Diary>> checkDiaryIsExist() async
+  {
     if (listDiaries.length < 1)
     {
       listDiaries = [];
       var dr = await DAO.get5Diaries(0);
-      _refreshController.requestLoading(needMove: false, duration: Duration(microseconds: 300), curve: Curves.linear);
+      
+      await onReloading();
 
       if (dr == null)
       {
@@ -106,6 +116,14 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
     }else{
       return listDiaries;
     }
+  }
+
+  Future<void> onReloading() async
+  {
+    await _refreshController.requestLoading(
+        needMove: false, 
+        duration: Duration(microseconds: 300), 
+        curve: Curves.linear);
   }
 
   // 編集ボタンタップ
@@ -182,8 +200,8 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
   }
 
   // 編集ボタンタップ
-  void _onTapEdit(Diary dr){
-    Navigator.of(context).push(
+  void _onTapEdit(Diary dr) async{
+    bool ret = await Navigator.of(context).push(
       CupertinoPageRoute(
         builder: (BuildContext context){
           return ModalDiaryDetail.construct(dr);
@@ -191,6 +209,13 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
         fullscreenDialog: true
       )
     );
+
+    if (ret)
+    {
+      // 日記が更新された場合のみリフレッシュ
+      print("リロードします");
+      await refreshList();
+    }
   }
 
   // タブ切り替え
@@ -201,8 +226,8 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
   }
 
   // ダイアリー新規作成ボタンタップ
-  void _onDiaryCreateTapped(){
-    Navigator.of(context).push(
+  void _onDiaryCreateTapped() async {
+    bool ret = await Navigator.of(context).push(
       CupertinoPageRoute(
         builder: (BuildContext context){
         return ModalDiaryDetail();
@@ -210,6 +235,43 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
       fullscreenDialog: true
       )
     );
+
+    if (ret)
+    {
+      print("リロードします");
+      await refreshList();
+    }
+  }
+
+  Future<void> refreshList() async
+  {
+    print("リフレッシュします");
+
+    listDiaries = [];
+    var dr = await initializeDiary(flg: true);
+
+    await onReloading();
+
+    if (dr == null)
+    {
+      // 日記が登録されていない
+      listDiaries.add(new Diary(0,'test',''));
+      return;
+
+    }else{
+      // 日記が登録されている
+      listDiaries = dr;
+      return;
+    }
+  }
+
+  // 全ての日記を取得
+  Future<List<Diary>> getAllDiary() async{
+    if (DAO.database == null)
+    {
+      await initializeDiary();
+    }
+    return await DAO.getDiaries();
   }
 
   // マイページ編集ボタンタップ
@@ -305,10 +367,11 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
             controller: _refreshController,
             onLoading: _onLoading,
             child: ListView.builder(
-                  itemBuilder: (c,i) => FutureProvider<Diary>(
-                    create: (_) => initializeDiary().then((value) => value[i]),
+                  itemBuilder: (c,i) => 
+                  FutureProvider<Diary>(
+                    create: (context) => initializeDiary().then((value) => value[i]),
                     initialData: new Diary(0, "Please add new diary!", ""),
-                    child: _messageItem(),
+                    child: Consumer<Diary>(builder: (context, value, child) => _messageItem(context)),
                   ),
                   itemExtent: 100.0,
                   itemCount: listDiaries.length,
@@ -428,9 +491,10 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
           /// マイページの中身
           ///
           FutureProvider<List<Diary>>(
-                create: (_) => initializeDiary(),
+                create: (context) => getAllDiary().then<List<Diary>>((value) => value),
                 initialData: new List<Diary>.empty(),
-                child: _myPageContents(),
+                child: Consumer<List<Diary>>(
+                  builder: (context, value, child) => _myPageContents(context)),
               ),
             ],
           )
@@ -538,8 +602,8 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
   }
 
   // ダイアリー一覧画面
-  Widget _messageItem() {
-    final dr = Provider.of<Diary>(context);
+  Widget _messageItem(BuildContext cntxt) {
+    final dr = Provider.of<Diary>(cntxt);
     return Container(
       child: ListTile(
         leading: Icon(Icons.cake),
@@ -576,10 +640,11 @@ class _StatefulHomePageState extends State<StatefulHomePage> with SingleTickerPr
     );
   }
 
-  Widget _myPageContents()
+  /// マイページの中身
+  Widget _myPageContents(BuildContext cntxt)
   {
-    List<Diary> dr = Provider.of(context);
-    DateTime _startDate =  dr[0] != null ? DateTime.parse(dr[0].date).toLocal() : DateTime.now();
+    List<Diary> dr = Provider.of(cntxt);
+    DateTime _startDate =  dr.length > 0 ? DateTime.parse(dr.first.date).toLocal() : DateTime.now();
 
     return 
     Container(child: 

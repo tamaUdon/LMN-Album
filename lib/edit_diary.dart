@@ -54,11 +54,8 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
               child: Text("Delete"),
               isDestructiveAction: true,
               onPressed: () => {
-                setState(() {
-                  Navigator.pop(context);
-                  Navigator.pushReplacementNamed(context, '/home');
-                }),
                 _doDelete(context, dr),
+                Navigator.of(context).pop(true),
               }
             ),
             CupertinoDialogAction(
@@ -78,9 +75,7 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
 
   // 削除キャンセル
   void _ontapCancel(BuildContext context){
-    setState(() {
       Navigator.pop(context);
-    });
   }
 
   // 日記の通し番号取得
@@ -139,7 +134,8 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
       // TODO: ここでINSERT失敗ダイアログ
     }
     print("INSERT or UPDATE 成功");
-    Navigator.of(context).pop(); // TODO: ここで戻った先のhome.dartに引数を渡して画面を再描画させる
+
+    Navigator.of(context).pop(true);
   }
 
   // 新規登録
@@ -178,7 +174,10 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
               IconButton(
                 icon: Icon(Icons.delete),
                 onPressed: () => { 
-                  _onTapDelete(context, widget.dr, 'Do you really want to delete this diary?', ''),
+                  _onTapDelete(
+                    context, 
+                    widget.dr, 
+                    'Do you really want to delete this diary?', ''),
                 }
               ),
             ]
@@ -219,22 +218,22 @@ class _ModalDiarydetailState extends State<ModalDiaryDetail>{
             // OKボタン
             Padding(
               padding: EdgeInsets.only(top: 10.0),
-              child: 
-                RaisedButton(
-                  color: kLightYellow,
-                  padding: EdgeInsets.symmetric(horizontal: 30.0),
-                  child: Text(
-                    'OK',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w300,
-                    ),
+              child: RaisedButton(
+                color: kLightYellow,
+                padding: EdgeInsets.symmetric(horizontal: 30.0),
+                child: Text(
+                  'OK',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w300,
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  onPressed: _onOKTapped,
                 ),
-            )
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                onPressed: 
+                  () => _onOKTapped(),
+              ),
+            ),
           ],
         ),
       ),
