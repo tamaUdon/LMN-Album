@@ -1,6 +1,6 @@
 # albumapp
 
-A new Flutter project.
+Flutter学習用に色々試したリポジトリ
 
 ## Getting Started
 
